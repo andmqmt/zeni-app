@@ -55,11 +55,12 @@ async function apiFetch<T = unknown>(
     headers.set('Authorization', `Bearer ${token}`);
   }
 
-  // CRITICAL: Always include credentials (cookies/session)
+  // Security: Never send cookies/credentials. This app uses token-based auth via Authorization header.
+  // Credentials are explicitly omitted to prevent CSRF and other cookie-based attacks.
   const response = await fetch(url, {
     ...fetchOptions,
     headers,
-    credentials: 'include',
+    credentials: 'omit', // Hard-coded for security - auth is via Authorization header only
   });
 
   // Handle 401 Unauthorized -> redirect to login
