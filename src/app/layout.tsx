@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter, Sora } from 'next/font/google';
 import './globals.css';
 import { Providers } from '@/components/providers';
@@ -18,8 +18,14 @@ const sora = Sora({
 export const metadata: Metadata = {
   title: 'Zeni App',
   description: 'Sua gestão financeira simplificada',
-  themeColor: '#0F172A',
   manifest: '/manifest.json',
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#0F172A' },
+  ],
 };
 
 export default function RootLayout({
@@ -29,6 +35,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR" suppressHydrationWarning>
+      <head />
       <body className={`${inter.variable} ${sora.variable} font-sans antialiased bg-gray-50 dark:bg-gray-900 transition-colors duration-200`}>
         <Providers>{children}</Providers>
       </body>
