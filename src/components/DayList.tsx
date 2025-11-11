@@ -78,13 +78,12 @@ export default function DayList({ year, month, dailyBalances }: DayListProps) {
                 {balance && (
                   <div className="flex items-center gap-2 mt-1">
                     <div 
-                      className="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full"
-                      style={{ 
-                        backgroundColor: balance.status === 'green' ? '#22c55e' 
-                          : balance.status === 'red' ? '#ef4444' 
-                          : balance.status === 'yellow' ? '#eab308' 
-                          : '#9ca3af' 
-                      }}
+                      className={`w-2 h-2 md:w-2.5 md:h-2.5 rounded-full ${
+                        balance.status === 'green' ? 'bg-success-500' 
+                          : balance.status === 'red' ? 'bg-danger-500' 
+                          : balance.status === 'yellow' ? 'bg-warning-500' 
+                          : 'bg-gray-400 dark:bg-gray-500'
+                      }`}
                     ></div>
                     <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
                       {balance.status === 'green' ? t('status.good') : 
@@ -99,13 +98,12 @@ export default function DayList({ year, month, dailyBalances }: DayListProps) {
             {balance ? (
               <div className="text-right">
                 <div 
-                  className="text-base md:text-xl font-bold"
-                  style={{ 
-                    color: balance.status === 'green' ? '#22c55e' 
-                      : balance.status === 'red' ? '#ef4444' 
-                      : balance.status === 'yellow' ? '#eab308' 
-                      : '#6b7280' 
-                  }}
+                  className={`text-base md:text-xl font-bold ${
+                    balance.status === 'green' ? 'text-success-600 dark:text-success-400' 
+                      : balance.status === 'red' ? 'text-danger-600 dark:text-danger-400' 
+                      : balance.status === 'yellow' ? 'text-warning-600 dark:text-warning-400' 
+                      : 'text-gray-600 dark:text-gray-400'
+                  }`}
                 >
                   {formatCurrency(balance.balance)}
                 </div>

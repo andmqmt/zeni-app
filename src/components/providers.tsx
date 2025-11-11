@@ -1,7 +1,7 @@
 'use client';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactNode, useState } from 'react';
+import { ReactNode, useState, useEffect } from 'react';
 import { ThemeProvider, useTheme } from '@/contexts/ThemeContext';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 import { BalanceVisibilityProvider } from '@/contexts/BalanceVisibilityContext';
@@ -37,21 +37,33 @@ export function Providers({ children }: ProvidersProps) {
   );
 }
 
+/**
+ * ThemeColorSync component
+ * Synchronizes the meta theme-color tag with the current theme state
+ * This ensures the browser/PWA status bar color matches the app theme
+ */
 function ThemeColorSync() {
-  // Sync meta[name="theme-color"] at runtime to follow manual theme toggles
   const { theme } = useTheme();
-  // Neutral base: dark uses gray-900 (#111827), light uses near-white (#ffffff)
-  const color = theme === 'dark' ? '#111827' : '#ffffff';
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  (function update() {
+  
+  useEffect(() => {
+    // Skip if not in browser environment
     if (typeof document === 'undefined') return;
+    
+    // Light theme uses white, dark theme uses gray-900
+    const color = theme === 'dark' ? '#111827' : '#ffffff';
+    
+    // Get or create the theme-color meta tag
     let meta = document.querySelector('meta[name="theme-color"]') as HTMLMetaElement | null;
+    
     if (!meta) {
       meta = document.createElement('meta');
       meta.setAttribute('name', 'theme-color');
       document.head.appendChild(meta);
     }
-    if (meta.getAttribute('content') !== color) meta.setAttribute('content', color);
-  })();
+    
+    // Update the content attribute
+    meta.setAttribute('content', color);
+  }, [theme]);
+  
   return null;
 }

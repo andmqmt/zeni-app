@@ -50,13 +50,12 @@ export default function Calendar({ year, month, dailyBalances }: CalendarProps) 
                 {balance && isCurrentMonth && (
                   <>
                     <div 
-                      className="w-full h-1.5 rounded-full mb-2 flex-shrink-0"
-                      style={{ 
-                        backgroundColor: balance.status === 'green' ? '#22c55e' 
-                          : balance.status === 'red' ? '#ef4444' 
-                          : balance.status === 'yellow' ? '#eab308' 
-                          : '#9ca3af' 
-                      }}
+                      className={`w-full h-1.5 rounded-full mb-2 flex-shrink-0 ${
+                        balance.status === 'green' ? 'bg-success-500' 
+                          : balance.status === 'red' ? 'bg-danger-500' 
+                          : balance.status === 'yellow' ? 'bg-warning-500' 
+                          : 'bg-gray-400 dark:bg-gray-500'
+                      }`}
                     ></div>
                     <div className="text-xs font-bold text-gray-900 dark:text-white truncate mt-auto" title={formatCurrency(balance.balance)}>
                       {formatCurrency(balance.balance)}
