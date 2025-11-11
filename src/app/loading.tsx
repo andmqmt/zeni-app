@@ -1,6 +1,7 @@
 'use client';
 
-import { Wallet, Sparkles } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
+import BrandMark from '@/components/BrandMark';
 
 export default function Loading() {
   return (
@@ -26,7 +27,7 @@ export default function Loading() {
         <div className="text-center text-white">
           <div className="inline-flex items-center gap-3 mb-6">
             <div className="w-14 h-14 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-2xl shadow-black/20">
-              <Wallet className="w-8 h-8" />
+              <BrandMark size={40} />
             </div>
             <h1 className="font-display text-4xl font-bold tracking-tight">Zeni</h1>
           </div>

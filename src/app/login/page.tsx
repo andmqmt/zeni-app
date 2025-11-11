@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { authService } from '@/lib/api/auth.service';
 import { handleApiError } from '@/lib/utils/error';
-import { Wallet } from 'lucide-react';
+import BrandMark from '@/components/BrandMark';
 import { useLanguage } from '@/contexts/LanguageContext';
 import ThemeLanguageControls from '@/components/ThemeLanguageControls';
 
@@ -46,9 +46,9 @@ export default function LoginPage() {
         </div>
         <div className="relative z-10 flex flex-col justify-center px-16 text-white">
           <div className="flex items-center gap-3 mb-8">
-            <div className="w-14 h-14 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center">
-              <Wallet className="w-8 h-8" />
-            </div>
+              <div className="w-14 h-14 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center">
+                <BrandMark size={40} />
+              </div>
             <h1 className="font-display text-4xl font-bold">Zeni</h1>
           </div>
           <h2 className="text-display-md mb-6">
@@ -67,7 +67,7 @@ export default function LoginPage() {
           <div className="lg:hidden text-center mb-8">
             <div className="inline-flex items-center gap-2 mb-4">
               <div className="w-10 h-10 bg-primary-600 dark:bg-primary-500 rounded-xl flex items-center justify-center">
-                <Wallet className="w-6 h-6 text-white" />
+                <BrandMark size={28} />
               </div>
               <h1 className="font-display text-3xl font-bold text-gray-900 dark:text-white">Zeni</h1>
             </div>

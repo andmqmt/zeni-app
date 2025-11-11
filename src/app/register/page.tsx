@@ -1,6 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import BrandMark from '@/components/BrandMark';
+import ThemeLanguageControls from '@/components/ThemeLanguageControls';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { authService } from '@/lib/api/auth.service';
@@ -8,6 +11,7 @@ import { handleApiError } from '@/lib/utils/error';
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
@@ -39,28 +43,47 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Criar Conta
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Registre-se para começar
-          </p>
+    <div className="min-h-screen flex relative">
+      <div className="absolute top-4 right-4 z-50"><ThemeLanguageControls /></div>
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary-600 via-primary-700 to-primary-900 dark:from-primary-800 dark:via-primary-900 dark:to-gray-900 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0" style={{backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(255,255,255,0.15) 1px, transparent 0)', backgroundSize: '32px 32px'}}></div>
         </div>
-        <form className="mt-8 space-y-4" onSubmit={handleSubmit}>
-          {error && (
-            <div className="rounded-md bg-red-50 p-4">
-              <p className="text-sm text-red-800">{error}</p>
+        <div className="relative z-10 flex flex-col justify-center px-16 text-white">
+          <div className="flex items-center gap-3 mb-8">
+            <div className="w-14 h-14 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center">
+              <BrandMark size={40} />
             </div>
+            <h1 className="font-display text-4xl font-bold">Zeni</h1>
+          </div>
+          <h2 className="text-display-md mb-6">{t('login.hero.title')}<br/><span className="text-primary-200">{t('login.hero.subtitle')}</span></h2>
+          <p className="text-lg text-primary-100 max-w-md leading-relaxed">{t('login.hero.description')}</p>
+        </div>
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-accent-500 rounded-full blur-3xl opacity-20" />
+      </div>
+      <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-900">
+        <div className="max-w-md w-full space-y-8">
+          <div className="lg:hidden text-center mb-8">
+            <div className="inline-flex items-center gap-2 mb-4">
+              <div className="w-10 h-10 bg-primary-600 dark:bg-primary-500 rounded-xl flex items-center justify-center">
+                <BrandMark size={28} />
+              </div>
+              <h1 className="font-display text-3xl font-bold text-gray-900 dark:text-white">Zeni</h1>
+            </div>
+          </div>
+          <div>
+            <h2 className="font-display text-3xl font-bold text-gray-900 dark:text-white">Criar Conta</h2>
+            <p className="mt-2 text-gray-600 dark:text-gray-400">Registre-se para começar</p>
+          </div>
+          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          {error && (
+              <div className="rounded-xl bg-danger-50 dark:bg-danger-900/20 border border-danger-200 dark:border-danger-800 p-4">
+                <p className="text-sm text-danger-700 dark:text-danger-400 font-medium">{error}</p>
+              </div>
           )}
-          
-          <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="first_name" className="block text-sm font-medium text-gray-700">
-                Nome
-              </label>
+                <label htmlFor="first_name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nome</label>
               <input
                 id="first_name"
                 name="first_name"
@@ -68,13 +91,11 @@ export default function RegisterPage() {
                 required
                 value={formData.first_name}
                 onChange={handleChange}
-                className="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                  className="block w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-soft placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-white bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all sm:text-sm"
               />
             </div>
             <div>
-              <label htmlFor="last_name" className="block text-sm font-medium text-gray-700">
-                Sobrenome
-              </label>
+                <label htmlFor="last_name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Sobrenome</label>
               <input
                 id="last_name"
                 name="last_name"
@@ -82,15 +103,13 @@ export default function RegisterPage() {
                 required
                 value={formData.last_name}
                 onChange={handleChange}
-                className="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                  className="block w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-soft placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-white bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all sm:text-sm"
               />
             </div>
           </div>
 
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-              Email
-            </label>
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
             <input
               id="email"
               name="email"
@@ -98,14 +117,12 @@ export default function RegisterPage() {
               required
               value={formData.email}
               onChange={handleChange}
-              className="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                className="block w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-soft placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-white bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all sm:text-sm"
             />
-          </div>
+            </div>
 
-          <div>
-            <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-              Telefone
-            </label>
+            <div>
+              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Telefone</label>
             <input
               id="phone"
               name="phone"
@@ -114,14 +131,12 @@ export default function RegisterPage() {
               value={formData.phone}
               onChange={handleChange}
               placeholder="+5511999999999"
-              className="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                className="block w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-soft placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-white bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all sm:text-sm"
             />
-          </div>
+            </div>
 
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-              Senha
-            </label>
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Senha</label>
             <input
               id="password"
               name="password"
@@ -129,14 +144,12 @@ export default function RegisterPage() {
               required
               value={formData.password}
               onChange={handleChange}
-              className="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                className="block w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-soft placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-white bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all sm:text-sm"
             />
-          </div>
+            </div>
 
-          <div>
-            <label htmlFor="access_code" className="block text-sm font-medium text-gray-700">
-              Código de Acesso
-            </label>
+            <div>
+              <label htmlFor="access_code" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Código de Acesso</label>
             <input
               id="access_code"
               name="access_code"
@@ -144,29 +157,27 @@ export default function RegisterPage() {
               required
               value={formData.access_code}
               onChange={handleChange}
-              className="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                className="block w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-soft placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-white bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all sm:text-sm"
             />
-          </div>
+            </div>
 
-          <div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50"
-            >
-              {loading ? 'Registrando...' : 'Registrar'}
-            </button>
-          </div>
+            <div>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full flex justify-center items-center py-3.5 px-4 rounded-xl text-base font-semibold text-white bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-medium hover:shadow-hard"
+              >
+                {loading ? 'Registrando...' : 'Registrar'}
+              </button>
+            </div>
 
-          <div className="text-sm text-center">
-            <Link
-              href="/login"
-              className="font-medium text-primary-600 hover:text-primary-500"
-            >
-              Já tem uma conta? Faça login
-            </Link>
-          </div>
-        </form>
+            <div className="text-sm text-center">
+              <Link href="/login" className="font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors">
+                Já tem uma conta? Faça login
+              </Link>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );

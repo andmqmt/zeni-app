@@ -18,6 +18,8 @@ const sora = Sora({
 export const metadata: Metadata = {
   title: 'Zeni App',
   description: 'Sua gestão financeira simplificada',
+  themeColor: '#0F172A',
+  manifest: '/manifest.json',
 };
 
 export default function RootLayout({

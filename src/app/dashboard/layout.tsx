@@ -3,11 +3,12 @@
 import { ReactNode, useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { LayoutDashboard, Receipt, Repeat, Settings, Tag, TrendingUp, LogOut, Wallet, Menu, X, Eye, EyeOff } from 'lucide-react';
+import { LayoutDashboard, Receipt, Repeat, Settings, Tag, TrendingUp, LogOut, Menu, X, Eye, EyeOff } from 'lucide-react';
 import { removeToken } from '@/lib/api/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useBalanceVisibility } from '@/contexts/BalanceVisibilityContext';
 import ThemeLanguageControls from '@/components/ThemeLanguageControls';
+import BrandMark from '@/components/BrandMark';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -60,9 +61,7 @@ function DashboardLayoutClient({ children }: DashboardLayoutProps) {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       <div className="md:hidden bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-primary-600 dark:bg-primary-500 rounded-lg flex items-center justify-center">
-            <Wallet className="w-5 h-5 text-white" />
-          </div>
+          <BrandMark size={28} />
           <h1 className="font-display text-xl font-bold text-gray-900 dark:text-white">Zeni</h1>
         </div>
         <div className="flex items-center gap-2">
@@ -119,9 +118,7 @@ function DashboardLayoutClient({ children }: DashboardLayoutProps) {
         <aside className="hidden md:flex md:flex-col md:w-72 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 min-h-screen">
           <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary-600 to-primary-700 dark:from-primary-500 dark:to-primary-600 rounded-xl flex items-center justify-center shadow-medium">
-                <Wallet className="w-6 h-6 text-white" />
-              </div>
+              <BrandMark size={36} />
               <h1 className="font-display text-2xl font-bold text-gray-900 dark:text-white">Zeni</h1>
             </div>
             <button
