@@ -21,7 +21,9 @@ export interface BalanceQuery {
 
 export const transactionService = {
   async getAll(params?: TransactionQuery): Promise<Transaction[]> {
-    const { data } = await api.get<Transaction[]>('/transactions/', { params });
+    const { data } = await api.get<Transaction[]>('/transactions/', { 
+      params: params as unknown as Record<string, unknown> 
+    });
     return data;
   },
 
@@ -45,7 +47,9 @@ export const transactionService = {
   },
 
   async getDailyBalance(params: BalanceQuery): Promise<DailyBalance[]> {
-    const { data } = await api.get<DailyBalance[]>('/transactions/daily-balance', { params });
+    const { data } = await api.get<DailyBalance[]>('/transactions/daily-balance', { 
+      params: params as unknown as Record<string, unknown> 
+    });
     return data;
   },
 

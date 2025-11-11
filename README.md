@@ -18,7 +18,7 @@ Modern Next.js 14 app router frontend for personal finance: transactions, catego
 
 - Next.js 14 (App Router), React 18
 - TanStack Query 5 (data fetching/cache)
-- Axios
+- **Native fetch** with `credentials: 'include'` for cookie-based sessions
 - Tailwind CSS
 - lucide-react icons
 - TypeScript
@@ -66,6 +66,15 @@ npm start
 - Categories: `/categories/`
 - Recurring: `/recurring/`, `/recurring/materialize`
 
+**Credentials & CORS:**
+
+All requests use `credentials: 'include'` to send cookies/session. For cross-origin setups:
+
+- Backend must respond with:
+  - `Access-Control-Allow-Credentials: true`
+  - `Access-Control-Allow-Origin: https://your-frontend-domain.com` (not `*`)
+- Cookies must use `Secure`, `SameSite=None` for cross-site, and match domain/path.
+
 See `src/lib/api/*.service.ts` for the client wrappers and `front-guide.md` for a deeper contract overview.
 
 ## Project structure
@@ -96,6 +105,7 @@ src/
 
 ## Recent changes
 
+- **Migrated from Axios to native fetch** with `credentials: 'include'` to ensure cookies are sent on every request
 - Removed Budgets feature (routes, hooks, types, services)
 - Dashboard now computes KPIs from transactions
 - Fixed date parsing issues causing off-by-one day
