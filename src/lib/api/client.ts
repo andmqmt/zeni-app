@@ -32,10 +32,19 @@ export const removeToken = (): void => {
   }
 };
 
+// Hard‑enforce credentials + auth header on every request (some environments / adapters
+// may drop instance-level withCredentials, so we set it per-request too).
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+  config.withCredentials = true; // guarantee cookies (equivalent to fetch credentials: 'include')
   const token = getToken();
   if (token && config.headers) {
     config.headers.Authorization = `Bearer ${token}`;
+  }
+  if (process.env.NODE_ENV === 'development') {
+    // Lightweight debug line – helps verify in DevTools that header & credentials are set
+    // (You can remove later if too noisy.)
+    // eslint-disable-next-line no-console
+    console.debug('[api] ->', config.method?.toUpperCase(), config.url, 'withCredentials:', config.withCredentials);
   }
   return config;
 });
