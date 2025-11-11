@@ -40,7 +40,8 @@ export function Providers({ children }: ProvidersProps) {
 function ThemeColorSync() {
   // Sync meta[name="theme-color"] at runtime to follow manual theme toggles
   const { theme } = useTheme();
-  const color = theme === 'dark' ? '#0F172A' : '#ffffff';
+  // Neutral base: dark uses gray-900 (#111827), light uses near-white (#ffffff)
+  const color = theme === 'dark' ? '#111827' : '#ffffff';
   // eslint-disable-next-line react-hooks/rules-of-hooks
   (function update() {
     if (typeof document === 'undefined') return;
