@@ -9,6 +9,7 @@ import Calendar from '@/components/Calendar';
 import DayList from '@/components/DayList';
 import Loading from '@/components/Loading';
 import PageTransition from '@/components/PageTransition';
+import SmartTransactionInput from '@/components/SmartTransactionInput';
 import { formatISODate } from '@/lib/utils/format';
 
 export default function DashboardPage() {
@@ -75,6 +76,9 @@ export default function DashboardPage() {
         </div>
 
       {/* Removed budget related warnings */}
+
+      {/* Smart Transaction Input */}
+      <SmartTransactionInput />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
         <div className="bg-white dark:bg-gray-800 rounded-xl md:rounded-2xl p-4 md:p-6 shadow-medium border border-gray-200 dark:border-gray-700">

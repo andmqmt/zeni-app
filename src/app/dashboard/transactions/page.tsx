@@ -264,32 +264,45 @@ export default function TransactionsPage() {
                     <option value="income">💰 Receita</option>
                   </select>
                 </div>
-                <div>
-                  <label className="block text-xs md:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-                    <Tag className="h-4 w-4" />
-                    Categoria
-                  </label>
-                  <select
-                    value={formData.category_id || ""}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        category_id: e.target.value
-                          ? parseInt(e.target.value)
-                          : undefined,
-                      })
-                    }
-                    className="block w-full px-3 md:px-4 py-2.5 md:py-3 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg md:rounded-xl shadow-soft focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 focus:border-transparent text-gray-900 dark:text-white transition-all text-sm md:text-base"
-                  >
-                    <option value="">Sem categoria</option>
-                    {categories?.map((cat) => (
-                      <option key={cat.id} value={cat.id}>
-                        {cat.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                {/* Categoria só aparece na edição */}
+                {editingId && (
+                  <div>
+                    <label className="block text-xs md:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                      <Tag className="h-4 w-4" />
+                      Categoria
+                    </label>
+                    <select
+                      value={formData.category_id || ""}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          category_id: e.target.value
+                            ? parseInt(e.target.value)
+                            : undefined,
+                        })
+                      }
+                      className="block w-full px-3 md:px-4 py-2.5 md:py-3 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg md:rounded-xl shadow-soft focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 focus:border-transparent text-gray-900 dark:text-white transition-all text-sm md:text-base"
+                    >
+                      <option value="">Sem categoria</option>
+                      {categories?.map((cat) => (
+                        <option key={cat.id} value={cat.id}>
+                          {cat.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
               </div>
+
+              {/* Informação sobre categorização automática */}
+              {!editingId && (
+                <div className="bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-700 rounded-lg p-3 flex items-start gap-2">
+                  <Sparkles className="h-4 w-4 text-primary-600 dark:text-primary-400 mt-0.5 flex-shrink-0" />
+                  <p className="text-xs text-primary-700 dark:text-primary-300">
+                    <strong>Categorização automática:</strong> A categoria será gerada automaticamente pela IA após salvar. Você poderá editá-la depois se necessário.
+                  </p>
+                </div>
+              )}
 
               <div className="flex flex-col sm:flex-row gap-3 pt-2">
                 <button
