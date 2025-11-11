@@ -29,7 +29,6 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import Loading from "@/components/Loading";
 import PageTransition from "@/components/PageTransition";
 import CurrencyDisplay from "@/components/CurrencyDisplay";
-import CurrencyInput from "@/components/CurrencyInput";
 
 export default function TransactionsPage() {
   const [showForm, setShowForm] = useState(false);
@@ -211,16 +210,18 @@ export default function TransactionsPage() {
                   <label className="block text-xs md:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                     Valor (R$)
                   </label>
-                  <CurrencyInput
+                  <input
+                    type="number"
+                    step="0.01"
+                    required
+                    placeholder="0,00"
                     value={formData.amount}
-                    onChange={(value) =>
+                    onChange={(e) =>
                       setFormData({
                         ...formData,
-                        amount: value,
+                        amount: parseFloat(e.target.value),
                       })
                     }
-                    placeholder="0,00"
-                    required
                     className="block w-full px-3 md:px-4 py-2.5 md:py-3 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg md:rounded-xl shadow-soft focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 focus:border-transparent text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-all text-sm md:text-base"
                   />
                 </div>
