@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import BrandMark from '@/components/BrandMark';
 import ThemeLanguageControls from '@/components/ThemeLanguageControls';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useToast } from '@/contexts/ToastContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { authService } from '@/lib/api/auth.service';
@@ -11,6 +11,7 @@ import { handleApiError } from '@/lib/utils/error';
 
 export default function RegisterPage() {
   const router = useRouter();
+  const toast = useToast();
   const { t } = useLanguage();
   const [formData, setFormData] = useState({
     first_name: '',
@@ -34,9 +35,12 @@ export default function RegisterPage() {
 
     try {
       await authService.register(formData);
+      toast.success('Conta criada com sucesso! Faça login para continuar.');
       router.push('/login');
     } catch (err) {
-      setError(handleApiError(err));
+      const errorMessage = handleApiError(err);
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -50,12 +54,7 @@ export default function RegisterPage() {
           <div className="absolute inset-0" style={{backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(255,255,255,0.15) 1px, transparent 0)', backgroundSize: '32px 32px'}}></div>
         </div>
         <div className="relative z-10 flex flex-col justify-center px-16 text-white">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-14 h-14 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center">
-              <BrandMark size={40} />
-            </div>
-            <h1 className="font-display text-4xl font-bold">Zeni</h1>
-          </div>
+          <h1 className="font-display text-5xl font-bold mb-8">Zeni</h1>
           <h2 className="text-display-md mb-6">{t('login.hero.title')}<br/><span className="text-primary-200">{t('login.hero.subtitle')}</span></h2>
           <p className="text-lg text-primary-100 max-w-md leading-relaxed">{t('login.hero.description')}</p>
         </div>
@@ -64,12 +63,7 @@ export default function RegisterPage() {
       <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-900">
         <div className="max-w-md w-full space-y-8">
           <div className="lg:hidden text-center mb-8">
-            <div className="inline-flex items-center gap-2 mb-4">
-              <div className="w-10 h-10 bg-primary-600 dark:bg-primary-500 rounded-xl flex items-center justify-center">
-                <BrandMark size={28} />
-              </div>
-              <h1 className="font-display text-3xl font-bold text-gray-900 dark:text-white">Zeni</h1>
-            </div>
+            <h1 className="font-display text-4xl font-bold text-gray-900 dark:text-white mb-4">Zeni</h1>
           </div>
           <div>
             <h2 className="font-display text-3xl font-bold text-gray-900 dark:text-white">Criar Conta</h2>

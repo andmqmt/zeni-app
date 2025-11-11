@@ -10,6 +10,7 @@ import {
 import { useCategories } from "@/hooks/useCategories";
 import { formatCurrency, formatDate, formatISODate } from "@/lib/utils/format";
 import { handleApiError } from "@/lib/utils/error";
+import { useToast } from "@/contexts/ToastContext";
 import {
   Plus,
   Pencil,
@@ -36,6 +37,7 @@ export default function TransactionsPage() {
   const [filterCategory, setFilterCategory] = useState<number | undefined>();
   const [error, setError] = useState("");
   const { t } = useLanguage();
+  const toast = useToast();
 
   const [formData, setFormData] = useState<TransactionCreate>({
     description: "",
@@ -75,8 +77,10 @@ export default function TransactionsPage() {
     try {
       if (editingId) {
         await updateMutation.mutateAsync({ id: editingId, data: formData });
+        toast.success("Transação atualizada com sucesso!");
       } else {
         await createMutation.mutateAsync(formData);
+        toast.success("Transação criada com sucesso!");
       }
       // reset state
       setFormData({
@@ -89,7 +93,9 @@ export default function TransactionsPage() {
       setEditingId(null);
       setShowForm(false);
     } catch (err) {
-      setError(handleApiError(err));
+      const errorMessage = handleApiError(err);
+      setError(errorMessage);
+      toast.error(errorMessage);
     }
   };
 
@@ -97,8 +103,11 @@ export default function TransactionsPage() {
     if (confirm("Tem certeza que deseja excluir esta transação?")) {
       try {
         await deleteMutation.mutateAsync(id);
+        toast.success("Transação excluída com sucesso!");
       } catch (err) {
-        setError(handleApiError(err));
+        const errorMessage = handleApiError(err);
+        setError(errorMessage);
+        toast.error(errorMessage);
       }
     }
   };

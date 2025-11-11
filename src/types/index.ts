@@ -87,45 +87,7 @@ export interface DailyBalance {
   status: BalanceStatus | null;
 }
 
-
-export type RecurringFrequency = 'daily' | 'weekly' | 'monthly';
-
-export interface RecurringCreate {
-  description: string;
-  amount: number;
-  type: TransactionType;
-  frequency: RecurringFrequency;
-  interval: number;
-  start_date: string;
-  end_date?: string;
-  weekday?: number;
-  day_of_month?: number;
-  category_id?: number;
-}
-
-export interface Recurring {
-  id: number;
-  user_id: number;
-  description: string;
-  amount: number;
-  type: TransactionType;
-  frequency: RecurringFrequency;
-  interval: number;
-  start_date: string;
-  end_date?: string;
-  weekday?: number;
-  day_of_month?: number;
-  category_id?: number;
-  category?: Category;
-  next_run_date?: string;
-  created_at: string;
-}
-
 export interface CategorySuggestion {
   category?: Category;
   matched_keyword?: string;
-}
-
-export interface MaterializeResponse {
-  created: number;
 }

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useCategories, useCreateCategory, useDeleteCategory } from '@/hooks/useCategories';
 import { handleApiError } from '@/lib/utils/error';
+import { useToast } from '@/contexts/ToastContext';
 import { Plus, Trash2, Tag, X, FolderOpen } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import Loading from '@/components/Loading';
@@ -13,6 +14,7 @@ export default function CategoriesPage() {
   const [name, setName] = useState('');
   const [error, setError] = useState('');
   const { t } = useLanguage();
+  const toast = useToast();
 
   const { data: categories, isLoading } = useCategories();
   const createMutation = useCreateCategory();
@@ -26,8 +28,11 @@ export default function CategoriesPage() {
       await createMutation.mutateAsync({ name });
       setName('');
       setShowForm(false);
+      toast.success('Categoria criada com sucesso!');
     } catch (err) {
-      setError(handleApiError(err));
+      const errorMessage = handleApiError(err);
+      setError(errorMessage);
+      toast.error(errorMessage);
     }
   };
 
@@ -35,8 +40,11 @@ export default function CategoriesPage() {
     if (confirm('Tem certeza que deseja excluir esta categoria?')) {
       try {
         await deleteMutation.mutateAsync(id);
+        toast.success('Categoria excluída com sucesso!');
       } catch (err) {
-        setError(handleApiError(err));
+        const errorMessage = handleApiError(err);
+        setError(errorMessage);
+        toast.error(errorMessage);
       }
     }
   };

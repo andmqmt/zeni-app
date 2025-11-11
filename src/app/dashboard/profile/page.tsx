@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useProfile, useUpdateProfile, useInitPreferences, useUpdatePreferences } from '@/hooks/useUser';
 import { handleApiError } from '@/lib/utils/error';
+import { useToast } from '@/contexts/ToastContext';
 import { UserPreferences } from '@/types';
 import { User, Phone, Mail, Settings, TrendingUp, TrendingDown, Minus, CheckCircle, X, Shield, Sparkles, Globe, Moon, Sun, Monitor } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -17,9 +18,9 @@ export default function ProfilePage() {
   const updatePreferencesMutation = useUpdatePreferences();
   const { t, language, setLanguage } = useLanguage();
   const { theme, toggleTheme } = useTheme();
+  const toast = useToast();
 
   const [error, setError] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
 
   const [profileData, setProfileData] = useState({
     first_name: '',
@@ -51,21 +52,20 @@ export default function ProfilePage() {
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setSuccessMessage('');
 
     try {
       await updateProfileMutation.mutateAsync(profileData);
-      setSuccessMessage('Perfil atualizado com sucesso!');
-      setTimeout(() => setSuccessMessage(''), 3000);
+      toast.success('Perfil atualizado com sucesso!');
     } catch (err) {
-      setError(handleApiError(err));
+      const errorMessage = handleApiError(err);
+      setError(errorMessage);
+      toast.error(errorMessage);
     }
   };
 
   const handlePreferencesSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setSuccessMessage('');
 
     const payload = {
       bad_threshold: Number(preferencesData.bad_threshold),
@@ -74,12 +74,16 @@ export default function ProfilePage() {
     };
 
     if (isNaN(payload.bad_threshold) || isNaN(payload.ok_threshold) || isNaN(payload.good_threshold)) {
-      setError('Todos os limites devem ser números válidos');
+      const errorMessage = 'Todos os limites devem ser números válidos';
+      setError(errorMessage);
+      toast.error(errorMessage);
       return;
     }
 
     if (payload.bad_threshold > payload.ok_threshold || payload.ok_threshold > payload.good_threshold) {
-      setError('Os limites devem estar em ordem crescente: Ruim ≤ Regular ≤ Bom');
+      const errorMessage = 'Os limites devem estar em ordem crescente: Ruim ≤ Regular ≤ Bom';
+      setError(errorMessage);
+      toast.error(errorMessage);
       return;
     }
 
@@ -89,10 +93,11 @@ export default function ProfilePage() {
       } else {
         await initPreferencesMutation.mutateAsync(payload);
       }
-      setSuccessMessage('Preferências atualizadas com sucesso!');
-      setTimeout(() => setSuccessMessage(''), 3000);
+      toast.success('Preferências atualizadas com sucesso!');
     } catch (err) {
-      setError(handleApiError(err));
+      const errorMessage = handleApiError(err);
+      setError(errorMessage);
+      toast.error(errorMessage);
     }
   };
 
@@ -126,17 +131,6 @@ export default function ProfilePage() {
               <X className="h-3 w-3 text-white" />
             </div>
             <p className="text-sm text-danger-800 dark:text-danger-200 font-medium">{error}</p>
-          </div>
-        </div>
-      )}
-
-      {successMessage && (
-        <div className="bg-gradient-to-r from-success-50 to-success-100 dark:from-success-900/20 dark:to-success-800/20 border border-success-200 dark:border-success-700 rounded-xl md:rounded-2xl p-4 shadow-soft">
-          <div className="flex items-start gap-3">
-            <div className="flex-shrink-0 w-5 h-5 rounded-full bg-success-500 flex items-center justify-center">
-              <CheckCircle className="h-3 w-3 text-white" />
-            </div>
-            <p className="text-sm text-success-800 dark:text-success-200 font-medium">{successMessage}</p>
           </div>
         </div>
       )}

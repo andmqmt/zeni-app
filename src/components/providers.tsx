@@ -5,6 +5,7 @@ import { ReactNode, useState, useEffect } from 'react';
 import { ThemeProvider, useTheme } from '@/contexts/ThemeContext';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 import { BalanceVisibilityProvider } from '@/contexts/BalanceVisibilityContext';
+import { ToastProvider } from '@/contexts/ToastContext';
 
 interface ProvidersProps {
   children: ReactNode;
@@ -28,8 +29,10 @@ export function Providers({ children }: ProvidersProps) {
       <ThemeProvider>
         <LanguageProvider>
           <BalanceVisibilityProvider>
-            <ThemeColorSync />
-            {children}
+            <ToastProvider>
+              <ThemeColorSync />
+              {children}
+            </ToastProvider>
           </BalanceVisibilityProvider>
         </LanguageProvider>
       </ThemeProvider>
