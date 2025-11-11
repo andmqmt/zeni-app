@@ -74,11 +74,17 @@ async function apiFetch<T = unknown>(
 
   // Parse response
   let data: T;
-  const contentType = response.headers.get('Content-Type') || '';
-  if (contentType.includes('application/json')) {
-    data = await response.json();
+  
+  // 204 No Content - don't try to parse JSON
+  if (response.status === 204) {
+    data = undefined as T;
   } else {
-    data = (await response.text()) as T;
+    const contentType = response.headers.get('Content-Type') || '';
+    if (contentType.includes('application/json')) {
+      data = await response.json();
+    } else {
+      data = (await response.text()) as T;
+    }
   }
 
   if (!response.ok) {

@@ -74,7 +74,7 @@ export default function SmartTransactionInput({ onSuccess }: SmartInputProps) {
 
       // Show confidence warning if low
       if (parsed.confidence < 0.7) {
-        error('Interpretação com baixa confiança. Verifique os dados.');
+        error('⚠️ Interpretação com baixa confiança. Verifique os dados.');
       }
 
       setIsProcessing(false);
@@ -113,12 +113,35 @@ export default function SmartTransactionInput({ onSuccess }: SmartInputProps) {
       await queryClient.invalidateQueries({ queryKey: ['transactions'] });
       await queryClient.invalidateQueries({ queryKey: ['dailyBalance'] });
 
-      success(`Transação adicionada: ${parsed.description}`);
+      success(`✅ Transação adicionada: ${parsed.description}`);
       setCommand('');
       onSuccess?.();
     } catch (err: any) {
-      const message = err.response?.data?.detail?.detail || 'Erro ao processar comando';
-      error(message);
+      console.error('SmartTransaction error:', err);
+      
+      // Extract error message from different possible structures
+      let message = 'Erro ao processar comando';
+      
+      if (err.response?.data) {
+        const errorData = err.response.data;
+        
+        // Try detail.detail first (nested structure)
+        if (errorData.detail?.detail) {
+          message = errorData.detail.detail;
+        }
+        // Try direct detail
+        else if (typeof errorData.detail === 'string') {
+          message = errorData.detail;
+        }
+        // Try error message
+        else if (errorData.message) {
+          message = errorData.message;
+        }
+      } else if (err.message) {
+        message = err.message;
+      }
+      
+      error(`❌ ${message}`);
     } finally {
       setIsProcessing(false);
       setIsSaving(false);

@@ -10,7 +10,6 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import Loading from '@/components/Loading';
 import PageTransition from '@/components/PageTransition';
-import CurrencyInput from '@/components/CurrencyInput';
 
 export default function ProfilePage() {
   const { data: profile, isLoading } = useProfile();
@@ -32,12 +31,9 @@ export default function ProfilePage() {
 
   const [preferencesData, setPreferencesData] = useState<UserPreferences>({
     bad_threshold: 0,
-    ok_threshold: 0,
-    good_threshold: 0,
+    ok_threshold: 500,
+    good_threshold: 1500,
   });
-
-  // Armazenar valores configurados para usar como placeholder
-  const [configuredValues, setConfiguredValues] = useState<UserPreferences | null>(null);
 
   useEffect(() => {
     if (profile) {
@@ -48,14 +44,7 @@ export default function ProfilePage() {
         auto_categorize_enabled: profile.auto_categorize_enabled,
       });
       if (profile.preferences) {
-        // Armazena valores configurados para placeholder, não preenche o campo
-        setConfiguredValues(profile.preferences);
-        // Mantém campos vazios para facilitar a edição
-        setPreferencesData({
-          bad_threshold: 0,
-          ok_threshold: 0,
-          good_threshold: 0,
-        });
+        setPreferencesData(profile.preferences);
       }
     }
   }, [profile]);
@@ -78,11 +67,10 @@ export default function ProfilePage() {
     e.preventDefault();
     setError('');
 
-    // Se nenhum campo foi preenchido, usa valores atuais (se existirem)
     const payload = {
-      bad_threshold: Number(preferencesData.bad_threshold) || configuredValues?.bad_threshold || 0,
-      ok_threshold: Number(preferencesData.ok_threshold) || configuredValues?.ok_threshold || 0,
-      good_threshold: Number(preferencesData.good_threshold) || configuredValues?.good_threshold || 0,
+      bad_threshold: Number(preferencesData.bad_threshold),
+      ok_threshold: Number(preferencesData.ok_threshold),
+      good_threshold: Number(preferencesData.good_threshold),
     };
 
     if (isNaN(payload.bad_threshold) || isNaN(payload.ok_threshold) || isNaN(payload.good_threshold)) {
@@ -106,14 +94,6 @@ export default function ProfilePage() {
         await initPreferencesMutation.mutateAsync(payload);
       }
       toast.success('Preferências atualizadas com sucesso!');
-      
-      // Atualiza os valores configurados e limpa os campos
-      setConfiguredValues(payload);
-      setPreferencesData({
-        bad_threshold: 0,
-        ok_threshold: 0,
-        good_threshold: 0,
-      });
     } catch (err) {
       const errorMessage = handleApiError(err);
       setError(errorMessage);
@@ -298,11 +278,13 @@ export default function ProfilePage() {
                   Limite Ruim
                 </label>
               </div>
-              <CurrencyInput
-                value={preferencesData.bad_threshold}
-                onChange={(value) => setPreferencesData({ ...preferencesData, bad_threshold: value })}
-                placeholder={configuredValues?.bad_threshold ? `Atual: R$ ${configuredValues.bad_threshold.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : '0,00'}
+              <input
+                type="number"
+                step="0.01"
                 required
+                placeholder="0,00"
+                value={preferencesData.bad_threshold}
+                onChange={(e) => setPreferencesData({ ...preferencesData, bad_threshold: e.target.value === '' ? 0 : parseFloat(e.target.value) })}
                 className="block w-full px-3 md:px-4 py-2.5 md:py-3 bg-white dark:bg-gray-900 border border-danger-300 dark:border-danger-600 rounded-lg md:rounded-xl shadow-soft focus:outline-none focus:ring-2 focus:ring-danger-500 dark:focus:ring-danger-400 focus:border-transparent text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-all text-sm md:text-base font-semibold"
               />
               <p className="mt-2 text-xs text-danger-700 dark:text-danger-300">
@@ -311,7 +293,7 @@ export default function ProfilePage() {
             </div>
 
             {/* OK Threshold */}
-            <div className="bg-gradient-to-br from-warning-50 to-warning-100 dark:from-warning-900/20 dark:from-warning-800/20 border-2 border-warning-200 dark:border-warning-700 rounded-xl p-4">
+            <div className="bg-gradient-to-br from-warning-50 to-warning-100 dark:from-warning-900/20 dark:to-warning-800/20 border-2 border-warning-200 dark:border-warning-700 rounded-xl p-4">
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-8 h-8 bg-warning-500 rounded-lg flex items-center justify-center">
                   <Minus className="h-4 w-4 text-white" />
@@ -320,11 +302,13 @@ export default function ProfilePage() {
                   Limite Regular
                 </label>
               </div>
-              <CurrencyInput
-                value={preferencesData.ok_threshold}
-                onChange={(value) => setPreferencesData({ ...preferencesData, ok_threshold: value })}
-                placeholder={configuredValues?.ok_threshold ? `Atual: R$ ${configuredValues.ok_threshold.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : '0,00'}
+              <input
+                type="number"
+                step="0.01"
                 required
+                placeholder="500,00"
+                value={preferencesData.ok_threshold}
+                onChange={(e) => setPreferencesData({ ...preferencesData, ok_threshold: e.target.value === '' ? 0 : parseFloat(e.target.value) })}
                 className="block w-full px-3 md:px-4 py-2.5 md:py-3 bg-white dark:bg-gray-900 border border-warning-300 dark:border-warning-600 rounded-lg md:rounded-xl shadow-soft focus:outline-none focus:ring-2 focus:ring-warning-500 dark:focus:ring-warning-400 focus:border-transparent text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-all text-sm md:text-base font-semibold"
               />
               <p className="mt-2 text-xs text-warning-700 dark:text-warning-300">
@@ -342,11 +326,13 @@ export default function ProfilePage() {
                   Limite Bom
                 </label>
               </div>
-              <CurrencyInput
-                value={preferencesData.good_threshold}
-                onChange={(value) => setPreferencesData({ ...preferencesData, good_threshold: value })}
-                placeholder={configuredValues?.good_threshold ? `Atual: R$ ${configuredValues.good_threshold.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : '0,00'}
+              <input
+                type="number"
+                step="0.01"
                 required
+                placeholder="1500,00"
+                value={preferencesData.good_threshold}
+                onChange={(e) => setPreferencesData({ ...preferencesData, good_threshold: e.target.value === '' ? 0 : parseFloat(e.target.value) })}
                 className="block w-full px-3 md:px-4 py-2.5 md:py-3 bg-white dark:bg-gray-900 border border-success-300 dark:border-success-600 rounded-lg md:rounded-xl shadow-soft focus:outline-none focus:ring-2 focus:ring-success-500 dark:focus:ring-success-400 focus:border-transparent text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-all text-sm md:text-base font-semibold"
               />
               <p className="mt-2 text-xs text-success-700 dark:text-success-300">
