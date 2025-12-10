@@ -78,7 +78,7 @@ function DashboardLayoutClient({ children }: DashboardLayoutProps) {
       </div>
 
       {mobileMenuOpen && (
-        <div className="md:hidden bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800 px-4 py-2 animate-slide-up">
+        <div className="md:hidden bg-white dark:bg-black border-b border-gray-200 dark:border-gray-800 px-4 py-2 animate-slide-up">
           <nav className="space-y-1">
             {navigation.map((item) => {
               const Icon = item.icon;

@@ -60,6 +60,28 @@ export default function FloatingTransactionButton() {
     }
   }, [error]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleResize = () => {
+      if (typeof window === 'undefined') return;
+      
+      const vh = window.visualViewport?.height || window.innerHeight;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+    };
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', handleResize);
+      handleResize();
+    }
+
+    return () => {
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', handleResize);
+      }
+    };
+  }, [isOpen]);
+
   const toggleListening = () => {
     if (!recognitionRef.current) {
       error('Reconhecimento de voz não suportado');
@@ -298,7 +320,8 @@ export default function FloatingTransactionButton() {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="fixed bottom-20 right-4 md:bottom-24 md:right-8 w-[calc(100vw-2rem)] max-w-md bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800 z-50 overflow-hidden"
+              className="fixed bottom-20 right-4 md:bottom-24 md:right-8 w-[calc(100vw-2rem)] max-w-md bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800 z-50 overflow-hidden flex flex-col"
+              style={{ maxHeight: 'calc(var(--vh, 100vh) - 8rem)' }}
             >
               <div className="bg-gray-900 dark:bg-gray-100 p-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -321,7 +344,7 @@ export default function FloatingTransactionButton() {
                 </button>
               </div>
 
-              <div className="p-4 max-h-[70vh] overflow-y-auto">
+              <div className="p-4 overflow-y-auto flex-1">
                 {isProcessing && !confirmData && (
                   <motion.div
                     initial={{ opacity: 0 }}
@@ -526,6 +549,11 @@ export default function FloatingTransactionButton() {
                         disabled={isListening || isProcessing}
                         className="w-full px-4 py-3 pr-20 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400 focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100 focus:border-transparent disabled:opacity-50 transition-all"
                         autoFocus
+                        onFocus={(e) => {
+                          setTimeout(() => {
+                            e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                          }, 300);
+                        }}
                       />
                       <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
                         {recognitionRef.current && (
