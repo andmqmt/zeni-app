@@ -89,15 +89,15 @@ export default function MoneyTimePage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-gray-900 dark:bg-gray-100 rounded-lg p-6 text-white dark:text-gray-900"
+          className="bg-gray-900 dark:bg-gray-100 rounded-lg p-6"
         >
           <div className="flex items-start gap-4">
             <div className="w-12 h-12 bg-white/10 dark:bg-gray-900/10 rounded-lg flex items-center justify-center flex-shrink-0">
-              <Sparkles className="h-6 w-6" />
+              <Sparkles className="h-6 w-6 text-white dark:text-gray-900" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold mb-2">Análise Inteligente</h2>
-              <p className="text-sm opacity-90">
+              <h2 className="text-lg font-semibold mb-2 text-white dark:text-gray-900">Análise Inteligente</h2>
+              <p className="text-sm text-white/90 dark:text-gray-900/90">
                 Identificamos {insights.length} insight{insights.length !== 1 ? 's' : ''} importante{insights.length !== 1 ? 's' : ''} baseados em suas transações.
               </p>
             </div>

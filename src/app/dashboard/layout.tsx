@@ -56,8 +56,8 @@ function DashboardLayoutClient({ children }: DashboardLayoutProps) {
   ];
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-950">
-      <div className="md:hidden bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800 px-4 py-4 flex items-center justify-between sticky top-0 z-40 backdrop-blur-sm bg-white/80 dark:bg-gray-950/80">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="md:hidden bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800 px-4 py-4 flex items-center justify-between sticky top-0 z-40 backdrop-blur-sm bg-white/95 dark:bg-gray-950/95">
         <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Zeni</h1>
         <div className="flex items-center gap-2">
           <button
@@ -110,8 +110,8 @@ function DashboardLayoutClient({ children }: DashboardLayoutProps) {
       )}
 
       <div className="flex">
-        <aside className="hidden md:flex md:flex-col md:w-64 bg-white dark:bg-gray-950 border-r border-gray-200 dark:border-gray-800 min-h-screen sticky top-0">
-          <div className="p-6 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
+        <aside className="hidden md:flex md:flex-col md:w-64 bg-gray-50 dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 min-h-screen sticky top-0">
+          <div className="p-6 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between bg-gray-50 dark:bg-gray-900">
             <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">Zeni</h1>
             <button
               onClick={toggleVisibility}
@@ -152,7 +152,7 @@ function DashboardLayoutClient({ children }: DashboardLayoutProps) {
           </div>
         </aside>
 
-        <main className="flex-1 p-6 md:p-8 bg-gray-50 dark:bg-gray-900 min-h-screen">
+        <main className="flex-1 p-6 md:p-8 bg-white dark:bg-gray-950 min-h-screen">
           <div className="max-w-7xl mx-auto">
             {children}
           </div>

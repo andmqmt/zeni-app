@@ -49,16 +49,12 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen flex relative">
       <div className="absolute top-4 right-4 z-50"><ThemeLanguageControls /></div>
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary-600 via-primary-700 to-primary-900 dark:from-primary-800 dark:via-primary-900 dark:to-gray-900 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0" style={{backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(255,255,255,0.15) 1px, transparent 0)', backgroundSize: '32px 32px'}}></div>
+      <div className="hidden lg:flex lg:w-1/2 bg-gray-900 dark:bg-gray-100 relative overflow-hidden">
+        <div className="relative z-10 flex flex-col justify-center px-16 text-white dark:text-gray-900">
+          <h1 className="text-5xl font-bold mb-8">Zeni</h1>
+          <h2 className="text-4xl font-semibold mb-6">{t('login.hero.title')}<br/><span className="opacity-70">{t('login.hero.subtitle')}</span></h2>
+          <p className="text-lg opacity-80 max-w-md leading-relaxed">{t('login.hero.description')}</p>
         </div>
-        <div className="relative z-10 flex flex-col justify-center px-16 text-white">
-          <h1 className="font-display text-5xl font-bold mb-8">Zeni</h1>
-          <h2 className="text-display-md mb-6">{t('login.hero.title')}<br/><span className="text-primary-200">{t('login.hero.subtitle')}</span></h2>
-          <p className="text-lg text-primary-100 max-w-md leading-relaxed">{t('login.hero.description')}</p>
-        </div>
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-accent-500 rounded-full blur-3xl opacity-20" />
       </div>
       <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-900">
         <div className="max-w-md w-full space-y-8">
