@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 
 export function LoadingScreen() {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-white dark:bg-gray-950">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-white dark:bg-black">
       <motion.div
         className="flex flex-col items-center gap-4"
         initial={{ opacity: 0, scale: 0.9 }}

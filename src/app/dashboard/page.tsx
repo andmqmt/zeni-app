@@ -10,7 +10,6 @@ import Calendar from '@/components/Calendar';
 import DayList from '@/components/DayList';
 import Loading from '@/components/Loading';
 import PageTransition from '@/components/PageTransition';
-import SmartTransactionInput from '@/components/SmartTransactionInput';
 import { formatISODate } from '@/lib/utils/format';
 
 export default function DashboardPage() {
@@ -90,13 +89,20 @@ export default function DashboardPage() {
 
   const isCurrentMonth = selectedYear === currentDate.getFullYear() && selectedMonth === currentDate.getMonth() + 1;
 
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) return 'Bom dia';
+    if (hour >= 12 && hour < 18) return 'Boa tarde';
+    return 'Boa noite';
+  };
+
   return (
     <PageTransition>
       <div className="space-y-4 md:space-y-6">
         <div className="flex items-start justify-between gap-4 mb-2">
           <div>
             <h1 className="text-3xl font-semibold text-gray-900 dark:text-white mb-2">
-              {profile?.first_name ? `Olá, ${profile.first_name}` : 'Dashboard'}
+              {profile?.first_name ? `${getGreeting()}, ${profile.first_name}!` : 'Dashboard'}
             </h1>
             <div className="flex items-center gap-2 group">
               <button
@@ -124,11 +130,6 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
-
-      {/* Removed budget related warnings */}
-
-      {/* Smart Transaction Input */}
-      <SmartTransactionInput />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white dark:bg-gray-900 rounded-lg p-6 border border-gray-200 dark:border-gray-800">

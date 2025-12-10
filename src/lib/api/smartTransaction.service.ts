@@ -19,4 +19,36 @@ export const smartTransactionService = {
     });
     return response.data;
   },
+
+  parseImage: async (file: File): Promise<SmartTransactionResponse> => {
+    const formData = new FormData();
+    formData.append('image', file);
+    
+    const response = await api.post<SmartTransactionResponse>(
+      '/transactions/smart-parse-image',
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+    return response.data;
+  },
+
+  parseAudio: async (file: File): Promise<SmartTransactionResponse> => {
+    const formData = new FormData();
+    formData.append('audio', file);
+    
+    const response = await api.post<SmartTransactionResponse>(
+      '/transactions/smart-parse-audio',
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+    return response.data;
+  },
 };
