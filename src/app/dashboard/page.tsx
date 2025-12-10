@@ -93,15 +93,15 @@ export default function DashboardPage() {
   return (
     <PageTransition>
       <div className="space-y-4 md:space-y-6">
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex items-start justify-between gap-4 mb-2">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-1">
+            <h1 className="text-3xl font-semibold text-gray-900 dark:text-white mb-2">
               {profile?.first_name ? `Olá, ${profile.first_name}` : 'Dashboard'}
             </h1>
             <div className="flex items-center gap-2 group">
               <button
                 onClick={handlePreviousMonth}
-                className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors opacity-0 group-hover:opacity-100"
+                className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 title="Mês anterior"
               >
                 <ChevronLeft className="h-4 w-4 text-gray-400" />
@@ -109,14 +109,14 @@ export default function DashboardPage() {
               
               <button
                 onClick={handleToday}
-                className={`text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors ${!isCurrentMonth ? 'font-medium' : ''}`}
+                className={`text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors ${!isCurrentMonth ? 'font-medium' : ''}`}
               >
                 {monthNames[selectedMonth - 1]} de {selectedYear}
               </button>
               
               <button
                 onClick={handleNextMonth}
-                className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors opacity-0 group-hover:opacity-100"
+                className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 title="Próximo mês"
               >
                 <ChevronRight className="h-4 w-4 text-gray-400" />
@@ -130,40 +130,39 @@ export default function DashboardPage() {
       {/* Smart Transaction Input */}
       <SmartTransactionInput />
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Saldo</span>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-white dark:bg-gray-900 rounded-lg p-6 border border-gray-200 dark:border-gray-800">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Saldo</span>
             <Wallet className="w-4 h-4 text-gray-400" />
           </div>
-          <div className={`text-2xl font-bold ${endOfMonthBalance >= 0 ? 'text-success-600 dark:text-success-400' : 'text-danger-600 dark:text-danger-400'}`}>
+          <div className={`text-3xl font-semibold ${endOfMonthBalance >= 0 ? 'text-gray-900 dark:text-white' : 'text-red-600 dark:text-red-400'}`}>
             <CurrencyDisplay value={endOfMonthBalance} />
           </div>
         </div>
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Receitas</span>
-            <TrendingUp className="w-4 h-4 text-success-500" />
+        <div className="bg-white dark:bg-gray-900 rounded-lg p-6 border border-gray-200 dark:border-gray-800">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Receitas</span>
+            <TrendingUp className="w-4 h-4 text-gray-400" />
           </div>
-          <div className="text-2xl font-bold text-gray-900 dark:text-white">
+          <div className="text-3xl font-semibold text-gray-900 dark:text-white">
             <CurrencyDisplay value={totalIncome} />
           </div>
         </div>
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Despesas</span>
-            <TrendingDown className="w-4 h-4 text-danger-500" />
+        <div className="bg-white dark:bg-gray-900 rounded-lg p-6 border border-gray-200 dark:border-gray-800">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Despesas</span>
+            <TrendingDown className="w-4 h-4 text-gray-400" />
           </div>
-          <div className="text-2xl font-bold text-gray-900 dark:text-white">
+          <div className="text-3xl font-semibold text-gray-900 dark:text-white">
             <CurrencyDisplay value={totalExpense} />
           </div>
         </div>
       </div>
 
-      {/* Removed budgets by category section */}
 
       {balanceLoading ? (
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-8 border border-gray-200 dark:border-gray-700">
+        <div className="bg-white dark:bg-gray-900 rounded-lg p-8 border border-gray-200 dark:border-gray-800">
           <div className="text-center text-gray-500 dark:text-gray-400">{t('common.loading')}</div>
         </div>
       ) : dailyBalance && dailyBalance.length > 0 ? (
@@ -176,7 +175,7 @@ export default function DashboardPage() {
           </div>
         </>
       ) : (
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-8 border border-gray-200 dark:border-gray-700">
+        <div className="bg-white dark:bg-gray-900 rounded-lg p-8 border border-gray-200 dark:border-gray-800">
           <div className="text-center text-gray-500 dark:text-gray-400">
             {t('dashboard.noTransactions')}
           </div>
