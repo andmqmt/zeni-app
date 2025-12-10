@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   useTransactions,
@@ -34,6 +35,7 @@ export default function TransactionsPage() {
   const currentDate = new Date();
   const currentYear = currentDate.getFullYear();
   const currentMonth = currentDate.getMonth() + 1;
+  const searchParams = useSearchParams();
   
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -42,6 +44,15 @@ export default function TransactionsPage() {
   const [error, setError] = useState("");
   const { t } = useLanguage();
   const toast = useToast();
+
+  useEffect(() => {
+    const dateParam = searchParams.get('date');
+    if (dateParam) {
+      setFilterDate(dateParam);
+      const [year, month] = dateParam.split('-');
+      setFilterMonth(`${year}-${month}`);
+    }
+  }, [searchParams]);
 
   const [formData, setFormData] = useState<TransactionCreate>({
     description: "",
