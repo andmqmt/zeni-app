@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Mic, MicOff, Sparkles, Send, Loader2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { transactionService } from '@/lib/api/transaction.service';
 import { smartTransactionService } from '@/lib/api/smartTransaction.service';
 import { useToast } from '@/contexts/ToastContext';
@@ -61,7 +62,7 @@ export default function SmartTransactionInput({ onSuccess }: SmartInputProps) {
     }
   };
 
-  const parseCommandWithAI = async (cmd: string): Promise<{ description: string; amount: number; type: 'income' | 'expense'; date: string; category_id?: number } | null> => {
+  const parseCommandWithAI = async (cmd: string): Promise<{ description: string; amount: number; type: 'income' | 'expense'; date: string } | null> => {
     try {
       const parsed = await smartTransactionService.parseCommand(cmd);
       
@@ -151,7 +152,6 @@ export default function SmartTransactionInput({ onSuccess }: SmartInputProps) {
         amount: parsed.amount,
         type: parsed.type,
         transaction_date: parsed.date,
-        category_id: parsed.category_id,
       });
 
       // Invalidate queries
@@ -192,17 +192,21 @@ export default function SmartTransactionInput({ onSuccess }: SmartInputProps) {
   ];
 
   return (
-    <div className="bg-gradient-to-br from-primary-50 to-primary-100 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-4 md:p-6 border border-primary-200 dark:border-gray-700 shadow-lg">
-      <div className="flex items-center gap-2 mb-3">
-        <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-700 rounded-lg flex items-center justify-center">
-          <Sparkles className="w-4 h-4 text-white" />
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-white dark:bg-gray-900 rounded-lg p-6 border border-gray-200 dark:border-gray-800"
+    >
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-8 h-8 bg-gray-900 dark:bg-gray-100 rounded-lg flex items-center justify-center">
+          <Sparkles className="w-4 h-4 text-white dark:text-gray-900" />
         </div>
-        <h2 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white">
-          Adicionar por Voz ou Texto
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+          Adicionar Transação
         </h2>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-3">
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div className="relative">
           <input
             type="text"
@@ -210,68 +214,97 @@ export default function SmartTransactionInput({ onSuccess }: SmartInputProps) {
             onChange={(e) => setCommand(e.target.value)}
             placeholder="Ex: gastei 50 reais no uber hoje"
             disabled={isListening || isProcessing}
-            className="w-full px-4 py-3 pr-24 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:opacity-50 text-sm md:text-base"
+            className="w-full px-4 py-3 pr-24 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100 focus:border-transparent disabled:opacity-50 transition-all"
           />
           <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-            {recognitionRef.current && (
-              <button
-                type="button"
-                onClick={toggleListening}
-                disabled={isProcessing}
-                className={`p-2 rounded-lg transition-all ${
-                  isListening
-                    ? 'bg-danger-500 text-white animate-pulse'
-                    : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
-                } disabled:opacity-50`}
-                title={isListening ? 'Parar gravação' : 'Gravar por voz'}
-              >
-                {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-              </button>
-            )}
-            <button
+            <AnimatePresence>
+              {recognitionRef.current && (
+                <motion.button
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  exit={{ scale: 0 }}
+                  type="button"
+                  onClick={toggleListening}
+                  disabled={isProcessing}
+                  className={`p-2 rounded-lg transition-colors ${
+                    isListening
+                      ? 'bg-red-600 text-white'
+                      : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                  } disabled:opacity-50`}
+                  title={isListening ? 'Parar gravação' : 'Gravar por voz'}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <motion.div
+                    animate={isListening ? { scale: [1, 1.1, 1] } : {}}
+                    transition={{ repeat: Infinity, duration: 1 }}
+                  >
+                    {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                  </motion.div>
+                </motion.button>
+              )}
+            </AnimatePresence>
+            <motion.button
               type="submit"
               disabled={!command.trim() || isProcessing}
-              className="p-2 rounded-lg bg-primary-500 text-white hover:bg-primary-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="p-2 rounded-lg bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               title="Enviar comando"
+              whileTap={{ scale: 0.95 }}
             >
               {isProcessing ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 <Send className="w-4 h-4" />
               )}
-            </button>
+            </motion.button>
           </div>
         </div>
 
-        {/* Examples */}
         <div className="flex flex-wrap gap-2">
           {examples.map((example, idx) => (
-            <button
+            <motion.button
               key={idx}
               type="button"
               onClick={() => setCommand(example)}
               disabled={isListening || isProcessing}
-              className="px-3 py-1.5 text-xs md:text-sm bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
+              className="px-3 py-1.5 text-xs bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
               {example}
-            </button>
+            </motion.button>
           ))}
         </div>
 
-        {isListening && (
-          <div className="flex items-center gap-2 text-sm text-danger-600 dark:text-danger-400">
-            <div className="w-2 h-2 bg-danger-500 rounded-full animate-pulse" />
-            Ouvindo...
-          </div>
-        )}
+        <AnimatePresence>
+          {isListening && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="flex items-center gap-2 text-sm text-red-600 dark:text-red-400"
+            >
+              <motion.div
+                className="w-2 h-2 bg-red-500 rounded-full"
+                animate={{ scale: [1, 1.2, 1], opacity: [1, 0.5, 1] }}
+                transition={{ repeat: Infinity, duration: 1.5 }}
+              />
+              Ouvindo...
+            </motion.div>
+          )}
 
-        {isProcessing && (
-          <div className="flex items-center gap-2 text-sm text-primary-600 dark:text-primary-400">
-            <Loader2 className="w-4 h-4 animate-spin" />
-            Criando transação...
-          </div>
-        )}
+          {isProcessing && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400"
+            >
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Criando transação...
+            </motion.div>
+          )}
+        </AnimatePresence>
       </form>
-    </div>
+    </motion.div>
   );
 }

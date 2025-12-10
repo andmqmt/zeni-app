@@ -56,20 +56,20 @@ function DashboardLayoutClient({ children }: DashboardLayoutProps) {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
-      <div className="md:hidden bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 flex items-center justify-between">
-        <h1 className="font-display text-xl font-bold text-gray-900 dark:text-white">Zeni</h1>
+    <div className="min-h-screen bg-white dark:bg-gray-950">
+      <div className="md:hidden bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800 px-4 py-4 flex items-center justify-between sticky top-0 z-40 backdrop-blur-sm bg-white/80 dark:bg-gray-950/80">
+        <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Zeni</h1>
         <div className="flex items-center gap-2">
           <button
             onClick={toggleVisibility}
-            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             title={isVisible ? t('common.hideValues') : t('common.showValues')}
           >
-            {isVisible ? <Eye className="w-5 h-5 text-gray-900 dark:text-white" /> : <EyeOff className="w-5 h-5 text-gray-900 dark:text-white" />}
+            {isVisible ? <Eye className="w-5 h-5 text-gray-700 dark:text-gray-300" /> : <EyeOff className="w-5 h-5 text-gray-700 dark:text-gray-300" />}
           </button>
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
           >
             {mobileMenuOpen ? <X className="w-6 h-6 text-gray-900 dark:text-white" /> : <Menu className="w-6 h-6 text-gray-900 dark:text-white" />}
           </button>
@@ -77,7 +77,7 @@ function DashboardLayoutClient({ children }: DashboardLayoutProps) {
       </div>
 
       {mobileMenuOpen && (
-        <div className="md:hidden bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-2">
+        <div className="md:hidden bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800 px-4 py-2 animate-slide-up">
           <nav className="space-y-1">
             {navigation.map((item) => {
               const Icon = item.icon;
@@ -87,10 +87,10 @@ function DashboardLayoutClient({ children }: DashboardLayoutProps) {
                   key={item.name}
                   href={item.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                  className={`flex items-center px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
                     isActive
-                      ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-400'
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                      ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
                   }`}
                 >
                   <Icon className="mr-3 h-5 w-5" />
@@ -100,7 +100,7 @@ function DashboardLayoutClient({ children }: DashboardLayoutProps) {
             })}
             <button
               onClick={handleLogout}
-              className="w-full flex items-center px-4 py-3 rounded-xl text-sm font-medium text-danger-600 dark:text-danger-400 hover:bg-danger-50 dark:hover:bg-danger-900/20 transition-all"
+              className="w-full flex items-center px-4 py-3 rounded-lg text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
             >
               <LogOut className="mr-3 h-5 w-5" />
               {t('nav.logout')}
@@ -110,15 +110,15 @@ function DashboardLayoutClient({ children }: DashboardLayoutProps) {
       )}
 
       <div className="flex">
-        <aside className="hidden md:flex md:flex-col md:w-72 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 min-h-screen">
-          <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-            <h1 className="font-display text-2xl font-bold text-gray-900 dark:text-white">Zeni</h1>
+        <aside className="hidden md:flex md:flex-col md:w-64 bg-white dark:bg-gray-950 border-r border-gray-200 dark:border-gray-800 min-h-screen sticky top-0">
+          <div className="p-6 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
+            <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">Zeni</h1>
             <button
               onClick={toggleVisibility}
-              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               title={isVisible ? t('common.hideValues') : t('common.showValues')}
             >
-              {isVisible ? <Eye className="w-5 h-5 text-gray-600 dark:text-gray-300" /> : <EyeOff className="w-5 h-5 text-gray-600 dark:text-gray-300" />}
+              {isVisible ? <Eye className="w-5 h-5 text-gray-600 dark:text-gray-400" /> : <EyeOff className="w-5 h-5 text-gray-600 dark:text-gray-400" />}
             </button>
           </div>
           <nav className="flex-1 px-4 py-6 space-y-1">
@@ -129,22 +129,22 @@ function DashboardLayoutClient({ children }: DashboardLayoutProps) {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                  className={`flex items-center px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
                     isActive
-                      ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-400 shadow-soft'
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                      ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
                   }`}
                 >
-                  <Icon className={`mr-3 h-5 w-5 ${isActive ? 'text-primary-600 dark:text-primary-400' : 'text-gray-400 dark:text-gray-500'}`} />
+                  <Icon className="mr-3 h-5 w-5" />
                   {item.name}
                 </Link>
               );
             })}
           </nav>
-          <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="p-4 border-t border-gray-200 dark:border-gray-800">
             <button
               onClick={handleLogout}
-              className="w-full flex items-center px-4 py-3 rounded-xl text-sm font-medium text-danger-600 dark:text-danger-400 hover:bg-danger-50 dark:hover:bg-danger-900/20 transition-all"
+              className="w-full flex items-center px-4 py-3 rounded-lg text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
             >
               <LogOut className="mr-3 h-5 w-5" />
               {t('nav.logout')}
@@ -152,7 +152,7 @@ function DashboardLayoutClient({ children }: DashboardLayoutProps) {
           </div>
         </aside>
 
-        <main className="flex-1 p-4 md:p-8">
+        <main className="flex-1 p-6 md:p-8 bg-gray-50 dark:bg-gray-900 min-h-screen">
           <div className="max-w-7xl mx-auto">
             {children}
           </div>

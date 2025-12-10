@@ -3,15 +3,13 @@ import {
   Transaction, 
   TransactionCreate, 
   TransactionUpdate, 
-  DailyBalance, 
-  CategorySuggestion 
+  DailyBalance
 } from '@/types';
 
 export interface TransactionQuery {
   skip?: number;
   limit?: number;
   on_date?: string;
-  category_id?: number;
 }
 
 export interface BalanceQuery {
@@ -51,12 +49,5 @@ export const transactionService = {
       params: params as unknown as Record<string, unknown> 
     });
     return data;
-  },
-
-  async suggestCategory(description: string): Promise<CategorySuggestion> {
-    const { data } = await api.post<CategorySuggestion>('/transactions/suggest-category', {
-      description,
-    });
-    return data;
-  },
+  }
 };

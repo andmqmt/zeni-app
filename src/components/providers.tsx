@@ -6,6 +6,7 @@ import { ThemeProvider, useTheme } from '@/contexts/ThemeContext';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 import { BalanceVisibilityProvider } from '@/contexts/BalanceVisibilityContext';
 import { ToastProvider } from '@/contexts/ToastContext';
+import { LoadingProvider } from '@/contexts/LoadingContext';
 
 interface ProvidersProps {
   children: ReactNode;
@@ -28,12 +29,14 @@ export function Providers({ children }: ProvidersProps) {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <LanguageProvider>
-          <BalanceVisibilityProvider>
-            <ToastProvider>
-              <ThemeColorSync />
-              {children}
-            </ToastProvider>
-          </BalanceVisibilityProvider>
+          <LoadingProvider>
+            <BalanceVisibilityProvider>
+              <ToastProvider>
+                <ThemeColorSync />
+                {children}
+              </ToastProvider>
+            </BalanceVisibilityProvider>
+          </LoadingProvider>
         </LanguageProvider>
       </ThemeProvider>
     </QueryClientProvider>

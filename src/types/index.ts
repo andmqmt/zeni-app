@@ -30,22 +30,10 @@ export interface UserProfile {
   email: string;
   phone: string;
   is_active: boolean;
-  auto_categorize_enabled: boolean;
   preferences?: UserPreferences;
   preferences_configured: boolean;
   created_at: string;
   updated_at?: string;
-}
-
-export interface Category {
-  id: number;
-  name: string;
-  user_id: number;
-  created_at: string;
-}
-
-export interface CategoryCreate {
-  name: string;
 }
 
 export type TransactionType = 'income' | 'expense';
@@ -55,7 +43,6 @@ export interface TransactionCreate {
   amount: number;
   type: TransactionType;
   transaction_date: string;
-  category_id?: number;
 }
 
 export interface TransactionUpdate {
@@ -63,7 +50,6 @@ export interface TransactionUpdate {
   amount?: number;
   type?: TransactionType;
   transaction_date?: string;
-  category_id?: number;
 }
 
 export interface Transaction {
@@ -73,8 +59,6 @@ export interface Transaction {
   amount: number;
   type: TransactionType;
   transaction_date: string;
-  category_id?: number;
-  category?: Category;
   created_at: string;
   updated_at?: string;
 }
@@ -85,9 +69,4 @@ export interface DailyBalance {
   date: string;
   balance: number;
   status: BalanceStatus | null;
-}
-
-export interface CategorySuggestion {
-  category?: Category;
-  matched_keyword?: string;
 }

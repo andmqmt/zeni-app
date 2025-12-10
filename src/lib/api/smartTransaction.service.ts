@@ -9,7 +9,6 @@ export interface SmartTransactionResponse {
   amount: number;
   type: 'income' | 'expense';
   transaction_date: string;
-  category_name?: string;
   confidence: number;
 }
 
