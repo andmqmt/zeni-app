@@ -1,9 +1,10 @@
 'use client';
 
+import { useState } from 'react';
 import { useDailyBalance, useTransactions } from '@/hooks/useTransactions';
 import { useProfile } from '@/hooks/useUser';
 import CurrencyDisplay from '@/components/CurrencyDisplay';
-import { TrendingUp, TrendingDown, Wallet } from 'lucide-react';
+import { TrendingUp, TrendingDown, Wallet, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import Calendar from '@/components/Calendar';
 import DayList from '@/components/DayList';
@@ -14,21 +15,19 @@ import { formatISODate } from '@/lib/utils/format';
 
 export default function DashboardPage() {
   const currentDate = new Date();
-  const currentYear = currentDate.getFullYear();
-  const currentMonth = currentDate.getMonth() + 1;
+  const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth() + 1);
   const { t } = useLanguage();
 
-  // Fetch all transactions for current month to compute totals
-  const monthStart = new Date(currentYear, currentMonth - 1, 1);
-  const monthEnd = new Date(currentYear, currentMonth, 0);
-  // Use local-date based ISO to avoid timezone shifts
+  const monthStart = new Date(selectedYear, selectedMonth - 1, 1);
+  const monthEnd = new Date(selectedYear, selectedMonth, 0);
   const startISO = formatISODate(monthStart);
   const endISO = formatISODate(monthEnd);
   const { data: transactions, isLoading: txLoading } = useTransactions();
 
   const { data: dailyBalance, isLoading: balanceLoading } = useDailyBalance({
-    year: currentYear,
-    month: currentMonth,
+    year: selectedYear,
+    month: selectedMonth,
   });
 
   const { data: profile } = useProfile();
@@ -61,6 +60,36 @@ export default function DashboardPage() {
     );
   }
 
+  const monthNames = [
+    'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+  ];
+
+  const handlePreviousMonth = () => {
+    if (selectedMonth === 1) {
+      setSelectedMonth(12);
+      setSelectedYear(selectedYear - 1);
+    } else {
+      setSelectedMonth(selectedMonth - 1);
+    }
+  };
+
+  const handleNextMonth = () => {
+    if (selectedMonth === 12) {
+      setSelectedMonth(1);
+      setSelectedYear(selectedYear + 1);
+    } else {
+      setSelectedMonth(selectedMonth + 1);
+    }
+  };
+
+  const handleToday = () => {
+    setSelectedYear(currentDate.getFullYear());
+    setSelectedMonth(currentDate.getMonth() + 1);
+  };
+
+  const isCurrentMonth = selectedYear === currentDate.getFullYear() && selectedMonth === currentDate.getMonth() + 1;
+
   return (
     <PageTransition>
       <div className="space-y-4 md:space-y-6">
@@ -70,8 +99,63 @@ export default function DashboardPage() {
               {profile?.first_name ? t('common.welcomeUser').replace('{name}', profile.first_name) : t('dashboard.welcome')}
             </h1>
             <p className="text-gray-600 dark:text-gray-400 mt-1 text-sm md:text-base">
-              {currentDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
+              {monthNames[selectedMonth - 1]} de {selectedYear}
             </p>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 rounded-xl md:rounded-2xl shadow-soft border border-gray-200 dark:border-gray-700 p-4">
+          <div className="flex items-center justify-between">
+            <button
+              onClick={handlePreviousMonth}
+              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              title="Mês anterior"
+            >
+              <ChevronLeft className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+            </button>
+            
+            <div className="flex items-center gap-3">
+              <select
+                value={selectedMonth}
+                onChange={(e) => setSelectedMonth(Number(e.target.value))}
+                className="px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary-500"
+              >
+                {monthNames.map((name, index) => (
+                  <option key={index} value={index + 1}>
+                    {name}
+                  </option>
+                ))}
+              </select>
+              
+              <select
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(Number(e.target.value))}
+                className="px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary-500"
+              >
+                {Array.from({ length: 5 }, (_, i) => currentDate.getFullYear() - 2 + i).map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
+              
+              {!isCurrentMonth && (
+                <button
+                  onClick={handleToday}
+                  className="px-3 py-2 text-xs font-semibold text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
+                >
+                  Hoje
+                </button>
+              )}
+            </div>
+            
+            <button
+              onClick={handleNextMonth}
+              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              title="Próximo mês"
+            >
+              <ChevronRight className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+            </button>
           </div>
         </div>
 
@@ -129,11 +213,11 @@ export default function DashboardPage() {
         <>
           <div className="hidden md:block">
             <h2 className="font-display text-lg md:text-xl font-bold text-gray-900 dark:text-white mb-3 md:mb-4">{t('dashboard.dailyBalance')}</h2>
-            <Calendar year={currentYear} month={currentMonth} dailyBalances={dailyBalance} />
+            <Calendar year={selectedYear} month={selectedMonth} dailyBalances={dailyBalance} />
           </div>
           <div className="block md:hidden">
             <h2 className="font-display text-lg font-bold text-gray-900 dark:text-white mb-3">{t('dashboard.dailyBalance')}</h2>
-            <DayList year={currentYear} month={currentMonth} dailyBalances={dailyBalance} />
+            <DayList year={selectedYear} month={selectedMonth} dailyBalances={dailyBalance} />
           </div>
         </>
       ) : (

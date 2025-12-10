@@ -3,9 +3,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { Mic, MicOff, Sparkles, Send, Loader2 } from 'lucide-react';
 import { transactionService } from '@/lib/api/transaction.service';
+import { smartTransactionService } from '@/lib/api/smartTransaction.service';
 import { useToast } from '@/contexts/ToastContext';
 import { useQueryClient } from '@tanstack/react-query';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 
 interface SmartInputProps {
   onSuccess?: () => void;
@@ -61,62 +61,28 @@ export default function SmartTransactionInput({ onSuccess }: SmartInputProps) {
     }
   };
 
-  const parseCommandWithAI = async (cmd: string): Promise<{ description: string; amount: number; type: 'income' | 'expense'; date: string } | null> => {
+  const parseCommandWithAI = async (cmd: string): Promise<{ description: string; amount: number; type: 'income' | 'expense'; date: string; category_id?: number } | null> => {
     try {
-      const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+      const parsed = await smartTransactionService.parseCommand(cmd);
       
-      if (!apiKey) {
-        console.warn('Gemini API key not configured, falling back to regex parser');
+      if (!parsed || !parsed.description || !parsed.amount || !parsed.type || !parsed.transaction_date) {
         return parseCommandWithRegex(cmd);
       }
 
-      const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
-
-      const prompt = `Você é um assistente financeiro. Extraia as seguintes informações do comando em português brasileiro:
-
-Comando: "${cmd}"
-
-Retorne APENAS um JSON válido com esta estrutura:
-{
-  "description": "descrição curta da transação (ex: Mercado, Uber, Salário)",
-  "amount": número decimal positivo,
-  "type": "income" ou "expense",
-  "date": "YYYY-MM-DD" (hoje=${new Date().toISOString().split('T')[0]}, ontem=dia anterior, etc)
-}
-
-Regras:
-- Se mencionar "gastei", "paguei", "comprei" = expense
-- Se mencionar "recebi", "ganhei", "salário" = income
-- Extraia o valor numérico (pode ter vírgula ou ponto)
-- Se não mencionar data, use hoje
-- description deve ser curto e objetivo`;
-
-      const result = await model.generateContent(prompt);
-      const text = result.response.text();
-      
-      // Extrair JSON da resposta
-      const jsonMatch = text.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) {
-        throw new Error('No JSON in AI response');
-      }
-
-      const parsed = JSON.parse(jsonMatch[0]);
-      
-      // Validar campos
-      if (!parsed.description || !parsed.amount || !parsed.type || !parsed.date) {
-        throw new Error('Missing required fields in AI response');
-      }
-
       if (parsed.amount <= 0) {
-        throw new Error('Invalid amount');
+        return parseCommandWithRegex(cmd);
       }
 
       if (!['income', 'expense'].includes(parsed.type)) {
-        throw new Error('Invalid type');
+        return parseCommandWithRegex(cmd);
       }
 
-      return parsed;
+      return {
+        description: parsed.description,
+        amount: parsed.amount,
+        type: parsed.type,
+        date: parsed.transaction_date,
+      };
     } catch (err) {
       console.error('AI parsing failed:', err);
       return parseCommandWithRegex(cmd);
@@ -180,12 +146,12 @@ Regras:
         return;
       }
 
-      // Create transaction directly
       await transactionService.create({
         description: parsed.description,
         amount: parsed.amount,
         type: parsed.type,
         transaction_date: parsed.date,
+        category_id: parsed.category_id,
       });
 
       // Invalidate queries
