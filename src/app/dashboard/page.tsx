@@ -93,78 +93,36 @@ export default function DashboardPage() {
   return (
     <PageTransition>
       <div className="space-y-4 md:space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="font-display text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
-              {profile?.first_name ? t('common.welcomeUser').replace('{name}', profile.first_name) : t('dashboard.welcome')}
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-1">
+              {profile?.first_name ? `Olá, ${profile.first_name}` : 'Dashboard'}
             </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1 text-sm md:text-base">
-              {monthNames[selectedMonth - 1]} de {selectedYear}
-            </p>
+            <div className="flex items-center gap-2 group">
+              <button
+                onClick={handlePreviousMonth}
+                className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors opacity-0 group-hover:opacity-100"
+                title="Mês anterior"
+              >
+                <ChevronLeft className="h-4 w-4 text-gray-400" />
+              </button>
+              
+              <button
+                onClick={handleToday}
+                className={`text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors ${!isCurrentMonth ? 'font-medium' : ''}`}
+              >
+                {monthNames[selectedMonth - 1]} de {selectedYear}
+              </button>
+              
+              <button
+                onClick={handleNextMonth}
+                className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors opacity-0 group-hover:opacity-100"
+                title="Próximo mês"
+              >
+                <ChevronRight className="h-4 w-4 text-gray-400" />
+              </button>
+            </div>
           </div>
-        </div>
-
-        <div className="flex items-center justify-between gap-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-3 shadow-soft">
-          <button
-            onClick={handlePreviousMonth}
-            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-            title="Mês anterior"
-          >
-            <ChevronLeft className="h-5 w-5 text-gray-600 dark:text-gray-400" />
-          </button>
-          
-          <div className="flex items-center gap-2 flex-1 justify-center">
-            <CalendarIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-            <select
-              value={selectedMonth}
-              onChange={(e) => setSelectedMonth(Number(e.target.value))}
-              className="bg-transparent text-gray-900 dark:text-white font-semibold focus:outline-none cursor-pointer pr-1"
-            >
-              {monthNames.map((name, index) => (
-                <option key={index} value={index + 1}>
-                  {name}
-                </option>
-              ))}
-            </select>
-            <select
-              value={selectedYear}
-              onChange={(e) => setSelectedYear(Number(e.target.value))}
-              className="bg-transparent text-gray-900 dark:text-white font-semibold focus:outline-none cursor-pointer"
-            >
-              {Array.from({ length: 5 }, (_, i) => currentDate.getFullYear() - 2 + i).map((year) => (
-                <option key={year} value={year}>
-                  {year}
-                </option>
-              ))}
-            </select>
-          </div>
-          
-          {!isCurrentMonth ? (
-            <button
-              onClick={handleToday}
-              className="px-3 py-2 text-xs font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors whitespace-nowrap"
-            >
-              Hoje
-            </button>
-          ) : (
-            <button
-              onClick={handleNextMonth}
-              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-              title="Próximo mês"
-            >
-              <ChevronRight className="h-5 w-5 text-gray-600 dark:text-gray-400" />
-            </button>
-          )}
-          
-          {!isCurrentMonth && (
-            <button
-              onClick={handleNextMonth}
-              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-              title="Próximo mês"
-            >
-              <ChevronRight className="h-5 w-5 text-gray-600 dark:text-gray-400" />
-            </button>
-          )}
         </div>
 
       {/* Removed budget related warnings */}

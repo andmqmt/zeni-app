@@ -113,40 +113,24 @@ export default function ProfilePage() {
 
   return (
     <PageTransition>
-      <div className="space-y-4 md:space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl md:text-3xl font-display font-bold text-gray-900 dark:text-white">
-          {t('profile.title')}
-        </h1>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-          {t('profile.subtitle')}
-        </p>
-      </div>
+      <div className="space-y-4">
+      <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
+        Perfil
+      </h1>
 
       {error && (
-        <div className="bg-gradient-to-r from-danger-50 to-danger-100 dark:from-danger-900/20 dark:to-danger-800/20 border border-danger-200 dark:border-danger-700 rounded-xl md:rounded-2xl p-4 shadow-soft">
-          <div className="flex items-start gap-3">
-            <div className="flex-shrink-0 w-5 h-5 rounded-full bg-danger-500 flex items-center justify-center">
-              <X className="h-3 w-3 text-white" />
-            </div>
-            <p className="text-sm text-danger-800 dark:text-danger-200 font-medium">{error}</p>
-          </div>
+        <div className="bg-danger-50 dark:bg-danger-900/20 border border-danger-200 dark:border-danger-700 rounded-lg p-3 text-sm text-danger-700 dark:text-danger-300">
+          {error}
         </div>
       )}
 
-      {/* Personal Information */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl md:rounded-2xl shadow-soft border border-gray-200 dark:border-gray-700 overflow-hidden">
-        <div className="bg-gradient-to-r from-primary-600 to-primary-700 dark:from-primary-700 dark:to-primary-800 px-4 md:px-6 py-4 md:py-5">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
-              <User className="h-5 w-5 text-white" />
-            </div>
-            <h2 className="text-lg md:text-xl font-display font-bold text-white">Informações Pessoais</h2>
-          </div>
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+          <User className="h-5 w-5 text-gray-400" />
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Informações Pessoais</h2>
         </div>
         
-        <form onSubmit={handleProfileSubmit} className="p-4 md:p-6 space-y-4 md:space-y-5">
+        <form onSubmit={handleProfileSubmit} className="p-6 space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs md:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">

@@ -7,7 +7,6 @@ import {
   useDeleteTransaction,
   useUpdateTransaction,
 } from "@/hooks/useTransactions";
-import { useCategories } from "@/hooks/useCategories";
 import { formatCurrency, formatDate, formatDateShort, formatMonthYear, formatISODate } from "@/lib/utils/format";
 import { handleApiError } from "@/lib/utils/error";
 import { useToast } from "@/contexts/ToastContext";
@@ -20,10 +19,8 @@ import {
   TrendingDown,
   X,
   Calendar,
-  Tag,
   Sparkles,
 } from "lucide-react";
-import Tooltip from "@/components/Tooltip";
 import { Transaction, TransactionCreate } from "@/types";
 import { useLanguage } from "@/contexts/LanguageContext";
 import Loading from "@/components/Loading";
@@ -39,7 +36,6 @@ export default function TransactionsPage() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [filterDate, setFilterDate] = useState("");
   const [filterMonth, setFilterMonth] = useState<string>(`${currentYear}-${String(currentMonth).padStart(2, '0')}`);
-  const [filterCategory, setFilterCategory] = useState<number | undefined>();
   const [error, setError] = useState("");
   const { t } = useLanguage();
   const toast = useToast();
@@ -60,7 +56,6 @@ export default function TransactionsPage() {
 
   const { data: allTransactions, isLoading } = useTransactions({
     on_date: filterDate || undefined,
-    category_id: filterCategory,
   });
 
   const transactions = allTransactions?.filter((t) => {
@@ -69,22 +64,6 @@ export default function TransactionsPage() {
     return txMonth === filterMonth;
   });
 
-  const { data: categories, isLoading: isLoadingCategories } = useCategories();
-  
-  const resolveCategoryName = (transaction: {
-    category?: { name?: string };
-    category_id?: number;
-  }) => {
-    if (transaction.category?.name) return transaction.category.name;
-    if (transaction.category_id && categories) {
-      const cat = categories.find(c => c.id === transaction.category_id);
-      if (cat) return cat.name;
-    }
-    return '-';
-  };
-  
-  const isAutoCategorized = (transaction: { category?: unknown; category_id?: number }) =>
-    !transaction.category && !!transaction.category_id;
 
   const groupTransactionsByMonth = (txs: Transaction[] | undefined) => {
     if (!txs) return [];
@@ -194,41 +173,31 @@ export default function TransactionsPage() {
         </div>
 
         {error && (
-          <div className="bg-gradient-to-r from-danger-50 to-danger-100 dark:from-danger-900/20 dark:to-danger-800/20 border border-danger-200 dark:border-danger-700 rounded-xl md:rounded-2xl p-4 shadow-soft">
-            <div className="flex items-start gap-3">
-              <div className="flex-shrink-0 w-5 h-5 rounded-full bg-danger-500 flex items-center justify-center">
-                <X className="h-3 w-3 text-white" />
-              </div>
-              <p className="text-sm text-danger-800 dark:text-danger-200 font-medium">
-                {error}
-              </p>
-            </div>
+          <div className="bg-danger-50 dark:bg-danger-900/20 border border-danger-200 dark:border-danger-700 rounded-lg p-3 text-sm text-danger-700 dark:text-danger-300">
+            {error}
           </div>
         )}
 
-        {/* Form Modal */}
         {showForm && (
-          <div className="bg-white dark:bg-gray-800 rounded-xl md:rounded-2xl shadow-strong border border-gray-200 dark:border-gray-700 overflow-hidden">
-            <div className="bg-gradient-to-r from-primary-600 to-primary-700 dark:from-primary-700 dark:to-primary-800 px-4 md:px-6 py-4 md:py-5">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg md:text-xl font-display font-bold text-white">
-                  {editingId ? "Editar Transação" : "Nova Transação"}
-                </h2>
-                <button
-                  onClick={() => setShowForm(false)}
-                  className="text-white/80 hover:text-white transition-colors"
-                >
-                  <X className="h-5 w-5 md:h-6 md:w-6" />
-                </button>
-              </div>
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                {editingId ? "Editar" : "Nova Transação"}
+              </h2>
+              <button
+                onClick={() => setShowForm(false)}
+                className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+              >
+                <X className="h-5 w-5 text-gray-400" />
+              </button>
             </div>
 
             <form
               onSubmit={handleSubmit}
-              className="p-4 md:p-6 space-y-4 md:space-y-5"
+              className="p-6 space-y-4"
             >
               <div>
-                <label className="block text-xs md:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
                   Descrição
                 </label>
                 <input
@@ -239,13 +208,13 @@ export default function TransactionsPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, description: e.target.value })
                   }
-                  className="block w-full px-3 md:px-4 py-2.5 md:py-3 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg md:rounded-xl shadow-soft focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 focus:border-transparent text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-all text-sm md:text-base"
+                  className="block w-full px-3 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 dark:text-white placeholder-gray-400 transition-all"
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs md:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
                     Valor (R$)
                   </label>
                   <input
@@ -260,12 +229,11 @@ export default function TransactionsPage() {
                         amount: parseFloat(e.target.value),
                       })
                     }
-                    className="block w-full px-3 md:px-4 py-2.5 md:py-3 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg md:rounded-xl shadow-soft focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 focus:border-transparent text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-all text-sm md:text-base"
+                    className="block w-full px-3 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 dark:text-white placeholder-gray-400 transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs md:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-                    <Calendar className="h-4 w-4" />
+                  <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
                     Data
                   </label>
                   <input
@@ -278,14 +246,14 @@ export default function TransactionsPage() {
                         transaction_date: e.target.value,
                       })
                     }
-                    className="block w-full px-3 md:px-4 py-2.5 md:py-3 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg md:rounded-xl shadow-soft focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 focus:border-transparent text-gray-900 dark:text-white transition-all text-sm md:text-base"
+                    className="block w-full px-3 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 dark:text-white transition-all"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs md:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
                     Tipo
                   </label>
                   <select
@@ -296,53 +264,16 @@ export default function TransactionsPage() {
                         type: e.target.value as "income" | "expense",
                       })
                     }
-                    className="block w-full px-3 md:px-4 py-2.5 md:py-3 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg md:rounded-xl shadow-soft focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 focus:border-transparent text-gray-900 dark:text-white transition-all text-sm md:text-base"
+                    className="block w-full px-3 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 dark:text-white transition-all"
                   >
-                    <option value="expense">💸 Despesa</option>
-                    <option value="income">💰 Receita</option>
+                    <option value="expense">Despesa</option>
+                    <option value="income">Receita</option>
                   </select>
                 </div>
-                {/* Categoria só aparece na edição */}
-                {editingId && (
-                  <div>
-                    <label className="block text-xs md:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-                      <Tag className="h-4 w-4" />
-                      Categoria
-                    </label>
-                    <select
-                      value={formData.category_id || ""}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          category_id: e.target.value
-                            ? parseInt(e.target.value)
-                            : undefined,
-                        })
-                      }
-                      className="block w-full px-3 md:px-4 py-2.5 md:py-3 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg md:rounded-xl shadow-soft focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 focus:border-transparent text-gray-900 dark:text-white transition-all text-sm md:text-base"
-                    >
-                      <option value="">Sem categoria</option>
-                      {categories?.map((cat) => (
-                        <option key={cat.id} value={cat.id}>
-                          {cat.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
               </div>
 
-              {/* Informação sobre categorização automática */}
-              {!editingId && (
-                <div className="bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-700 rounded-lg p-3 flex items-start gap-2">
-                  <Sparkles className="h-4 w-4 text-primary-600 dark:text-primary-400 mt-0.5 flex-shrink-0" />
-                  <p className="text-xs text-primary-700 dark:text-primary-300">
-                    <strong>Categorização automática:</strong> A categoria será gerada automaticamente pela IA após salvar. Você poderá editá-la depois se necessário.
-                  </p>
-                </div>
-              )}
 
-              <div className="flex flex-col sm:flex-row gap-3 pt-2">
+              <div className="flex gap-3 pt-2">
                 <button
                   type="button"
                   onClick={() => {
@@ -356,20 +287,20 @@ export default function TransactionsPage() {
                       category_id: undefined,
                     });
                   }}
-                  className="flex-1 px-4 md:px-5 py-2.5 md:py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl md:rounded-2xl text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 font-semibold transition-all text-sm md:text-base"
+                  className="flex-1 px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={createMutation.isPending || updateMutation.isPending}
-                  className="flex-1 px-4 md:px-5 py-2.5 md:py-3 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white rounded-xl md:rounded-2xl shadow-medium hover:shadow-strong disabled:opacity-50 disabled:cursor-not-allowed font-semibold transition-all text-sm md:text-base"
+                  className="flex-1 px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   {createMutation.isPending || updateMutation.isPending
                     ? "Salvando..."
                     : editingId
-                    ? "Atualizar Transação"
-                    : "Salvar Transação"}
+                    ? "Atualizar"
+                    : "Salvar"}
                 </button>
               </div>
             </form>
@@ -398,25 +329,6 @@ export default function TransactionsPage() {
             />
           </div>
           
-          <div className="relative flex-1 min-w-[160px]">
-            <Tag className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-            <select
-              value={filterCategory || ""}
-              onChange={(e) =>
-                setFilterCategory(
-                  e.target.value ? parseInt(e.target.value) : undefined
-                )
-              }
-              className="w-full pl-10 pr-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all appearance-none cursor-pointer"
-            >
-              <option value="">Todas categorias</option>
-              {categories?.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.name}
-                </option>
-              ))}
-            </select>
-          </div>
         </div>
 
         {/* Transactions List */}
@@ -448,15 +360,12 @@ export default function TransactionsPage() {
                           <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                             Data
                           </th>
-                          <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                            Descrição
-                          </th>
-                          <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                            Categoria
-                          </th>
-                          <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                            Tipo
-                          </th>
+                      <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                        Descrição
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                        Tipo
+                      </th>
                           <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                             Valor
                           </th>
@@ -479,25 +388,8 @@ export default function TransactionsPage() {
                                 {new Date(transaction.transaction_date).toLocaleDateString('pt-BR', { weekday: 'short' })}
                               </div>
                             </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                        <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">
                           {transaction.description}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
-                          {isLoadingCategories ? (
-                            <span className="inline-block h-3 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-                          ) : (
-                            <span className="inline-flex items-center gap-1.5">
-                              {resolveCategoryName(transaction)}
-                              {isAutoCategorized(transaction) && (
-                                <Tooltip content="Categoria sugerida automaticamente (IA)">
-                                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-primary-700 dark:text-primary-300 bg-primary-100/70 dark:bg-primary-900/30 px-1.5 py-0.5 rounded">
-                                    <Sparkles className="h-3 w-3" />
-                                    AI
-                                  </span>
-                                </Tooltip>
-                              )}
-                            </span>
-                          )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span
@@ -585,24 +477,6 @@ export default function TransactionsPage() {
                                   {new Date(transaction.transaction_date).toLocaleDateString('pt-BR', { weekday: 'short' })}
                                 </span>
                               </div>
-                        <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400 mt-1">
-                          <Tag className="h-3 w-3" />
-                          {isLoadingCategories ? (
-                            <span className="inline-block h-3 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-                          ) : (
-                            <span className="inline-flex items-center gap-1.5">
-                              {resolveCategoryName(transaction)}
-                              {isAutoCategorized(transaction) && (
-                                <Tooltip content="Categoria sugerida automaticamente (IA)">
-                                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-primary-700 dark:text-primary-300 bg-primary-100/70 dark:bg-primary-900/30 px-1.5 py-0.5 rounded">
-                                    <Sparkles className="h-3 w-3" />
-                                    AI
-                                  </span>
-                                </Tooltip>
-                              )}
-                            </span>
-                          )}
-                        </div>
                       </div>
                       <div className="flex items-center gap-1 flex-shrink-0">
                         <button
