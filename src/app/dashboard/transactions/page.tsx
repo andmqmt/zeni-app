@@ -8,7 +8,7 @@ import {
   useUpdateTransaction,
 } from "@/hooks/useTransactions";
 import { useCategories } from "@/hooks/useCategories";
-import { formatCurrency, formatDate, formatISODate } from "@/lib/utils/format";
+import { formatCurrency, formatDate, formatDateShort, formatMonthYear, formatISODate } from "@/lib/utils/format";
 import { handleApiError } from "@/lib/utils/error";
 import { useToast } from "@/contexts/ToastContext";
 import {
@@ -24,7 +24,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import Tooltip from "@/components/Tooltip";
-import { TransactionCreate } from "@/types";
+import { Transaction, TransactionCreate } from "@/types";
 import { useLanguage } from "@/contexts/LanguageContext";
 import Loading from "@/components/Loading";
 import PageTransition from "@/components/PageTransition";
@@ -52,7 +52,7 @@ export default function TransactionsPage() {
   });
 
   const { data: categories, isLoading: isLoadingCategories } = useCategories();
-  // Resolve category name even if backend didn't embed the category object (e.g. auto-categorização retorna apenas category_id)
+  
   const resolveCategoryName = (transaction: {
     category?: { name?: string };
     category_id?: number;
@@ -64,8 +64,35 @@ export default function TransactionsPage() {
     }
     return '-';
   };
+  
   const isAutoCategorized = (transaction: { category?: unknown; category_id?: number }) =>
     !transaction.category && !!transaction.category_id;
+
+  const groupTransactionsByMonth = (txs: Transaction[] | undefined) => {
+    if (!txs) return [];
+    
+    const groups: { [key: string]: Transaction[] } = {};
+    
+    txs.forEach((transaction) => {
+      const date = new Date(transaction.transaction_date);
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      
+      if (!groups[monthKey]) {
+        groups[monthKey] = [];
+      }
+      groups[monthKey].push(transaction);
+    });
+    
+    return Object.entries(groups)
+      .sort(([a], [b]) => b.localeCompare(a))
+      .map(([monthKey, groupTxs]) => ({
+        monthKey,
+        monthLabel: formatMonthYear(groupTxs[0].transaction_date),
+        transactions: groupTxs,
+      }));
+  };
+
+  const groupedTransactions = groupTransactionsByMonth(transactions);
   const createMutation = useCreateTransaction();
   const deleteMutation = useDeleteTransaction();
   const updateMutation = useUpdateTransaction();
@@ -401,38 +428,50 @@ export default function TransactionsPage() {
             <>
               {/* Desktop Table View */}
               <div className="hidden md:block overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                  <thead className="bg-gray-50 dark:bg-gray-800/50">
-                    <tr>
-                      <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                        Data
-                      </th>
-                      <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                        Descrição
-                      </th>
-                      <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                        Categoria
-                      </th>
-                      <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                        Tipo
-                      </th>
-                      <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                        Valor
-                      </th>
-                      <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                        Ações
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                    {transactions.map((transaction) => (
-                      <tr
-                        key={transaction.id}
-                        className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
-                      >
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white font-medium">
-                          {formatDate(transaction.transaction_date)}
-                        </td>
+                {groupedTransactions.map((group) => (
+                  <div key={group.monthKey} className="mb-8 last:mb-0">
+                    <div className="sticky top-0 bg-gray-50 dark:bg-gray-800/95 backdrop-blur-sm z-10 px-6 py-3 border-b-2 border-primary-200 dark:border-primary-700">
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                        {group.monthLabel}
+                      </h3>
+                    </div>
+                    <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                      <thead className="bg-gray-50 dark:bg-gray-800/50">
+                        <tr>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                            Data
+                          </th>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                            Descrição
+                          </th>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                            Categoria
+                          </th>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                            Tipo
+                          </th>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                            Valor
+                          </th>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                            Ações
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                        {group.transactions.map((transaction) => (
+                          <tr
+                            key={transaction.id}
+                            className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                          >
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm font-semibold text-gray-900 dark:text-white">
+                                {formatDateShort(transaction.transaction_date)}
+                              </div>
+                              <div className="text-xs text-gray-500 dark:text-gray-400">
+                                {new Date(transaction.transaction_date).toLocaleDateString('pt-BR', { weekday: 'short' })}
+                              </div>
+                            </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                           {transaction.description}
                         </td>
@@ -503,29 +542,42 @@ export default function TransactionsPage() {
                           </button>
                         </td>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ))}
               </div>
 
               {/* Mobile Card View */}
-              <div className="md:hidden divide-y divide-gray-200 dark:divide-gray-700">
-                {transactions.map((transaction) => (
-                  <div
-                    key={transaction.id}
-                    className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
-                  >
-                    <div className="flex items-start justify-between gap-3 mb-3">
-                      <div className="flex-1">
-                        <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-1">
-                          {transaction.description}
-                        </h4>
-                        <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
-                          <Calendar className="h-3 w-3" />
-                          <span>
-                            {formatDate(transaction.transaction_date)}
-                          </span>
-                        </div>
+              <div className="md:hidden">
+                {groupedTransactions.map((group) => (
+                  <div key={group.monthKey} className="mb-6 last:mb-0">
+                    <div className="sticky top-0 bg-gray-50 dark:bg-gray-800/95 backdrop-blur-sm z-10 px-4 py-3 border-b-2 border-primary-200 dark:border-primary-700 mb-2">
+                      <h3 className="text-base font-bold text-gray-900 dark:text-white">
+                        {group.monthLabel}
+                      </h3>
+                    </div>
+                    <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                      {group.transactions.map((transaction) => (
+                        <div
+                          key={transaction.id}
+                          className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                        >
+                          <div className="flex items-start justify-between gap-3 mb-3">
+                            <div className="flex-1">
+                              <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-1">
+                                {transaction.description}
+                              </h4>
+                              <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
+                                <Calendar className="h-3 w-3" />
+                                <span className="font-medium">
+                                  {formatDateShort(transaction.transaction_date)}
+                                </span>
+                                <span className="text-gray-400 dark:text-gray-500">
+                                  {new Date(transaction.transaction_date).toLocaleDateString('pt-BR', { weekday: 'short' })}
+                                </span>
+                              </div>
                         <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400 mt-1">
                           <Tag className="h-3 w-3" />
                           {isLoadingCategories ? (
@@ -593,6 +645,9 @@ export default function TransactionsPage() {
                         {transaction.type === "income" ? "+" : "-"}{" "}
                         <CurrencyDisplay value={transaction.amount} />
                       </span>
+                    </div>
+                  </div>
+                      ))}
                     </div>
                   </div>
                 ))}
