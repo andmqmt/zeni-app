@@ -3,7 +3,7 @@
 import { ReactNode, useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { LayoutDashboard, Receipt, Settings, Tag, TrendingUp, LogOut, Menu, X, Eye, EyeOff } from 'lucide-react';
+import { LayoutDashboard, Receipt, Settings, Sparkles, TrendingUp, LogOut, Menu, X, Eye, EyeOff } from 'lucide-react';
 import { removeToken } from '@/lib/api/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useBalanceVisibility } from '@/contexts/BalanceVisibilityContext';
@@ -51,7 +51,7 @@ function DashboardLayoutClient({ children }: DashboardLayoutProps) {
   const navigation = [
     { name: t('nav.home'), href: '/dashboard', icon: LayoutDashboard },
     { name: t('nav.transactions'), href: '/dashboard/transactions', icon: Receipt },
-    { name: t('nav.categories'), href: '/dashboard/categories', icon: Tag },
+    { name: 'MoneyTime', href: '/dashboard/moneytime', icon: Sparkles },
     { name: t('nav.settings'), href: '/dashboard/profile', icon: Settings },
   ];
 
