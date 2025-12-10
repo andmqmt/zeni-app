@@ -331,50 +331,54 @@ export default function TransactionsPage() {
                         key={transaction.id}
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        className="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                        className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
                       >
-                        <div className="flex items-start gap-4 flex-1">
-                          <div className={`mt-1 w-2 h-2 rounded-full flex-shrink-0 ${
-                            transaction.type === "income" ? "bg-green-500" : "bg-red-500"
-                          }`} />
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-medium text-gray-900 dark:text-white">
-                              {transaction.description}
-                            </h4>
-                            <div className="flex items-center gap-2 mt-1 text-xs text-gray-500 dark:text-gray-400">
-                              <span>{formatDateShort(transaction.transaction_date)}</span>
-                              <span>•</span>
-                              <span className={transaction.type === "income" ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}>
-                                {transaction.type === "income" ? "Receita" : "Despesa"}
-                              </span>
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                          <div className="flex items-start gap-3 flex-1 min-w-0">
+                            <div className={`mt-1 w-2 h-2 rounded-full flex-shrink-0 ${
+                              transaction.type === "income" ? "bg-green-500" : "bg-red-500"
+                            }`} />
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-medium text-gray-900 dark:text-white truncate">
+                                {transaction.description}
+                              </h4>
+                              <div className="flex items-center gap-2 mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                <span>{formatDateShort(transaction.transaction_date)}</span>
+                                <span>•</span>
+                                <span className={transaction.type === "income" ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}>
+                                  {transaction.type === "income" ? "Receita" : "Despesa"}
+                                </span>
+                              </div>
                             </div>
                           </div>
-                          <div className={`text-lg font-semibold ${
-                            transaction.type === "income"
-                              ? "text-green-600 dark:text-green-400"
-                              : "text-red-600 dark:text-red-400"
-                          }`}>
-                            {transaction.type === "income" ? "+" : "-"}
-                            <CurrencyDisplay value={transaction.amount} />
+                          <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4">
+                            <div className={`text-lg font-semibold ${
+                              transaction.type === "income"
+                                ? "text-green-600 dark:text-green-400"
+                                : "text-red-600 dark:text-red-400"
+                            }`}>
+                              {transaction.type === "income" ? "+" : "-"}
+                              <CurrencyDisplay value={transaction.amount} />
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => openEdit(transaction)}
+                                title="Editar"
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleDelete(transaction.id)}
+                                title="Excluir"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
                           </div>
-                        </div>
-                        <div className="flex items-center gap-1 ml-4">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => openEdit(transaction)}
-                            title="Editar"
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleDelete(transaction.id)}
-                            title="Excluir"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
                         </div>
                       </motion.div>
                     ))}

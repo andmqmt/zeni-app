@@ -8,6 +8,7 @@ import { removeToken } from '@/lib/api/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useBalanceVisibility } from '@/contexts/BalanceVisibilityContext';
 import ThemeLanguageControls from '@/components/ThemeLanguageControls';
+import FloatingTransactionButton from '@/components/FloatingTransactionButton';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -56,8 +57,8 @@ function DashboardLayoutClient({ children }: DashboardLayoutProps) {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="md:hidden bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800 px-4 py-4 flex items-center justify-between sticky top-0 z-40 backdrop-blur-sm bg-white/95 dark:bg-gray-950/95">
+    <div className="min-h-screen bg-gray-50 dark:bg-black">
+      <div className="md:hidden bg-white dark:bg-black border-b border-gray-200 dark:border-gray-800 px-4 py-4 flex items-center justify-between sticky top-0 z-40 backdrop-blur-sm bg-white/95 dark:bg-black/95">
         <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Zeni</h1>
         <div className="flex items-center gap-2">
           <button
@@ -152,12 +153,14 @@ function DashboardLayoutClient({ children }: DashboardLayoutProps) {
           </div>
         </aside>
 
-        <main className="flex-1 p-6 md:p-8 bg-white dark:bg-gray-950 min-h-screen">
+        <main className="flex-1 p-6 md:p-8 bg-white dark:bg-black min-h-screen">
           <div className="max-w-7xl mx-auto">
             {children}
           </div>
         </main>
       </div>
+      
+      <FloatingTransactionButton />
     </div>
   );
 }
