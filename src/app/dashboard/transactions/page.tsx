@@ -31,9 +31,14 @@ import PageTransition from "@/components/PageTransition";
 import CurrencyDisplay from "@/components/CurrencyDisplay";
 
 export default function TransactionsPage() {
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear();
+  const currentMonth = currentDate.getMonth() + 1;
+  
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [filterDate, setFilterDate] = useState("");
+  const [filterMonth, setFilterMonth] = useState<string>(`${currentYear}-${String(currentMonth).padStart(2, '0')}`);
   const [filterCategory, setFilterCategory] = useState<number | undefined>();
   const [error, setError] = useState("");
   const { t } = useLanguage();
@@ -46,9 +51,22 @@ export default function TransactionsPage() {
     transaction_date: formatISODate(new Date()),
   });
 
-  const { data: transactions, isLoading } = useTransactions({
+  const getMonthStartEnd = (monthKey: string) => {
+    const [year, month] = monthKey.split('-').map(Number);
+    const start = new Date(year, month - 1, 1);
+    const end = new Date(year, month, 0);
+    return { start: formatISODate(start), end: formatISODate(end) };
+  };
+
+  const { data: allTransactions, isLoading } = useTransactions({
     on_date: filterDate || undefined,
     category_id: filterCategory,
+  });
+
+  const transactions = allTransactions?.filter((t) => {
+    if (!filterMonth) return true;
+    const txMonth = t.transaction_date.substring(0, 7);
+    return txMonth === filterMonth;
   });
 
   const { data: categories, isLoading: isLoadingCategories } = useCategories();
@@ -162,23 +180,16 @@ export default function TransactionsPage() {
   return (
     <PageTransition>
       <div className="space-y-4 md:space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-display font-bold text-gray-900 dark:text-white">
-              {t("nav.transactions")}
-            </h1>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              Gerencie suas receitas e despesas
-            </p>
-          </div>
+        <div className="flex items-center justify-between gap-4">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
+            Transações
+          </h1>
           <button
             onClick={() => setShowForm(!showForm)}
-            className="flex items-center justify-center gap-2 px-4 md:px-5 py-2.5 md:py-3 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white rounded-xl md:rounded-2xl shadow-medium hover:shadow-strong transition-all font-semibold text-sm md:text-base"
+            className="flex items-center gap-2 px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors font-medium text-sm"
           >
-            <Plus className="h-4 w-4 md:h-5 md:w-5" />
-            <span className="hidden sm:inline">Nova Transação</span>
-            <span className="sm:hidden">Nova</span>
+            <Plus className="h-4 w-4" />
+            <span className="hidden sm:inline">Nova</span>
           </button>
         </div>
 
@@ -365,50 +376,46 @@ export default function TransactionsPage() {
           </div>
         )}
 
-        {/* Filters */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl md:rounded-2xl shadow-soft border border-gray-200 dark:border-gray-700 p-4 md:p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Search className="h-5 w-5 text-primary-600 dark:text-primary-400" />
-            <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white">
-              Filtros
-            </h3>
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="relative flex-1 min-w-[160px]">
+            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+            <input
+              type="month"
+              value={filterMonth}
+              onChange={(e) => setFilterMonth(e.target.value)}
+              className="w-full pl-10 pr-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+            />
           </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs md:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                Filtrar por Data
-              </label>
-              <input
-                type="date"
-                value={filterDate}
-                onChange={(e) => setFilterDate(e.target.value)}
-                className="block w-full px-3 md:px-4 py-2.5 md:py-3 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg md:rounded-xl shadow-soft focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 focus:border-transparent text-gray-900 dark:text-white transition-all text-sm md:text-base"
-              />
-            </div>
-            <div>
-              <label className="block text-xs md:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-                <Tag className="h-4 w-4" />
-                Filtrar por Categoria
-              </label>
-              <select
-                value={filterCategory || ""}
-                onChange={(e) =>
-                  setFilterCategory(
-                    e.target.value ? parseInt(e.target.value) : undefined
-                  )
-                }
-                className="block w-full px-3 md:px-4 py-2.5 md:py-3 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg md:rounded-xl shadow-soft focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 focus:border-transparent text-gray-900 dark:text-white transition-all text-sm md:text-base"
-              >
-                <option value="">Todas as categorias</option>
-                {categories?.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+          
+          <div className="relative flex-1 min-w-[160px]">
+            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+            <input
+              type="date"
+              value={filterDate}
+              onChange={(e) => setFilterDate(e.target.value)}
+              placeholder="Data exata"
+              className="w-full pl-10 pr-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+            />
+          </div>
+          
+          <div className="relative flex-1 min-w-[160px]">
+            <Tag className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+            <select
+              value={filterCategory || ""}
+              onChange={(e) =>
+                setFilterCategory(
+                  e.target.value ? parseInt(e.target.value) : undefined
+                )
+              }
+              className="w-full pl-10 pr-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all appearance-none cursor-pointer"
+            >
+              <option value="">Todas categorias</option>
+              {categories?.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
