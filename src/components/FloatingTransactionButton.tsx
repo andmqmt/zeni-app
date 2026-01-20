@@ -9,6 +9,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/Select';
+import DatePicker from '@/components/ui/DatePicker';
 import { formatISODate } from '@/lib/utils/format';
 
 interface TransactionFormData {
@@ -148,12 +149,10 @@ export default function FloatingTransactionButton() {
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Data
                   </label>
-                  <Input
-                    type="date"
-                    required
+                  <DatePicker
                     value={formData.transaction_date}
-                    onChange={(e) =>
-                      setFormData({ ...formData, transaction_date: e.target.value })
+                    onChange={(date) =>
+                      setFormData({ ...formData, transaction_date: date })
                     }
                     className="w-full"
                   />
