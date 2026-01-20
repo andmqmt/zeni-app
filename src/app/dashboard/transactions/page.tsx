@@ -24,6 +24,7 @@ import { usePreviewTransactions } from "@/contexts/PreviewTransactionContext";
 import Loading from "@/components/Loading";
 import PageTransition from "@/components/PageTransition";
 import CurrencyDisplay from "@/components/CurrencyDisplay";
+import PreviewCountdown from "@/components/PreviewCountdown";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/Dialog";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -43,6 +44,7 @@ export default function TransactionsPage() {
   const [filterMonth, setFilterMonth] = useState<string>(`${currentYear}-${String(currentMonth).padStart(2, '0')}`);
   const [error, setError] = useState("");
   const [timeRemaining, setTimeRemaining] = useState<{ [key: string]: number }>({});
+  const [notifiedPreviews, setNotifiedPreviews] = useState<Set<string>>(new Set());
   const { t } = useLanguage();
   const toast = useToast();
   const queryClient = useQueryClient();
@@ -169,17 +171,43 @@ export default function TransactionsPage() {
     const interval = setInterval(() => {
       const now = Date.now();
       const remaining: { [key: string]: number } = {};
+      const expiredIds: string[] = [];
+      const newNotified = new Set(notifiedPreviews);
+      
       previewTransactions.forEach((preview) => {
         const remainingMs = preview.expiresAt - now;
         if (remainingMs > 0) {
-          remaining[preview.id] = Math.ceil(remainingMs / 1000);
+          const secondsRemaining = Math.ceil(remainingMs / 1000);
+          remaining[preview.id] = secondsRemaining;
+          
+          if (secondsRemaining <= 5 && !notifiedPreviews.has(`${preview.id}-5s`)) {
+            toast.error(`Transação "${preview.description}" expira em ${secondsRemaining}s!`);
+            newNotified.add(`${preview.id}-5s`);
+          } else if (secondsRemaining <= 10 && !notifiedPreviews.has(`${preview.id}-10s`)) {
+            toast.error(`Transação "${preview.description}" expira em ${secondsRemaining}s!`);
+            newNotified.add(`${preview.id}-10s`);
+          }
+        } else {
+          expiredIds.push(preview.id);
         }
       });
+      
+      if (expiredIds.length > 0) {
+        expiredIds.forEach((id) => {
+          const preview = previewTransactions.find((p) => p.id === id);
+          if (preview && !notifiedPreviews.has(`${id}-expired`)) {
+            toast.error(`Transação preview "${preview.description}" expirou e foi removida.`);
+            newNotified.add(`${id}-expired`);
+          }
+        });
+      }
+      
       setTimeRemaining(remaining);
+      setNotifiedPreviews(newNotified);
     }, 100);
 
     return () => clearInterval(interval);
-  }, [previewTransactions]);
+  }, [previewTransactions, notifiedPreviews, toast]);
 
   const handleSavePreview = async (id: string) => {
     try {
@@ -404,19 +432,19 @@ export default function TransactionsPage() {
                                     </span>
                                   )}
                                 </div>
-                                <div className="flex items-center gap-2 mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                  <span>{formatDateShort(transaction.transaction_date)}</span>
-                                  <span>•</span>
-                                  <span className={transaction.type === "income" ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}>
+                                <div className="flex flex-wrap items-center gap-1.5 md:gap-2 mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                  <span className="whitespace-nowrap">{formatDateShort(transaction.transaction_date)}</span>
+                                  <span className="hidden sm:inline">•</span>
+                                  <span className={`whitespace-nowrap ${transaction.type === "income" ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
                                     {transaction.type === "income" ? "Receita" : "Despesa"}
                                   </span>
                                   {isPreviewTransaction && remaining !== null && remaining > 0 && (
                                     <>
-                                      <span>•</span>
-                                      <span className="flex items-center gap-1 text-yellow-600 dark:text-yellow-400">
-                                        <Clock className="w-3 h-3" />
-                                        {remaining}s
-                                      </span>
+                                      <span className="hidden sm:inline">•</span>
+                                      <PreviewCountdown 
+                                        secondsRemaining={remaining} 
+                                        isExpiring={remaining <= 30}
+                                      />
                                     </>
                                   )}
                                 </div>
