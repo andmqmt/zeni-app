@@ -4,10 +4,10 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  useTransactions,
   useDeleteTransaction,
   useUpdateTransaction,
 } from "@/hooks/useTransactions";
+import { useTransactionsWithPreview } from "@/hooks/useTransactionsWithPreview";
 import { useQueryClient } from "@tanstack/react-query";
 import { formatCurrency, formatDate, formatDateShort, formatMonthYear, formatISODate } from "@/lib/utils/format";
 import { handleApiError } from "@/lib/utils/error";
@@ -30,6 +30,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
 import DatePicker from "@/components/ui/DatePicker";
+import MonthPicker from "@/components/ui/MonthPicker";
 import { Save, Clock } from "lucide-react";
 
 export default function TransactionsPage() {
@@ -66,37 +67,22 @@ export default function TransactionsPage() {
     transaction_date: formatISODate(new Date()),
   });
 
-  const { data: allTransactions, isLoading } = useTransactions({
+  const { data: allTransactionsData, isLoading } = useTransactionsWithPreview({
     on_date: filterDate || undefined,
   });
 
-  const realTransactions = allTransactions?.filter((t) => {
+  const transactions = allTransactionsData?.filter((t) => {
     if (!filterMonth) return true;
     const txMonth = t.transaction_date.substring(0, 7);
     return txMonth === filterMonth;
   }) || [];
 
-  const filteredPreviews = previewTransactions.filter((t) => {
-    if (!filterMonth) return true;
-    const txMonth = t.transaction_date.substring(0, 7);
-    return txMonth === filterMonth;
-  });
-
-  const allTransactionsCombined: (Transaction | typeof previewTransactions[0])[] = [
-    ...realTransactions,
-    ...filteredPreviews,
-  ].sort((a, b) => {
-    const dateA = new Date(a.transaction_date + 'T00:00:00').getTime();
-    const dateB = new Date(b.transaction_date + 'T00:00:00').getTime();
-    return dateB - dateA;
-  });
-
-  const transactions = allTransactionsCombined;
-
-  const groupTransactionsByMonth = (txs: (Transaction | typeof previewTransactions[0])[] | undefined) => {
+  const groupTransactionsByMonth = (txs: Transaction[] | undefined) => {
     if (!txs) return [];
     
-    const groups: { [key: string]: (Transaction | typeof previewTransactions[0])[] } = {};
+    const groups: { [key: string]: Transaction[] } = {};
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
     
     txs.forEach((transaction) => {
       const date = new Date(transaction.transaction_date);
@@ -114,9 +100,30 @@ export default function TransactionsPage() {
         monthKey,
         monthLabel: formatMonthYear(groupTxs[0].transaction_date),
         transactions: groupTxs.sort((a, b) => {
-          const dateA = new Date(a.transaction_date + 'T00:00:00').getTime();
-          const dateB = new Date(b.transaction_date + 'T00:00:00').getTime();
-          return dateB - dateA;
+          const dateA = new Date(a.transaction_date + 'T00:00:00');
+          const dateB = new Date(b.transaction_date + 'T00:00:00');
+          dateA.setHours(0, 0, 0, 0);
+          dateB.setHours(0, 0, 0, 0);
+          
+          const aIsToday = dateA.getTime() === today.getTime();
+          const bIsToday = dateB.getTime() === today.getTime();
+          
+          if (aIsToday && !bIsToday) return -1;
+          if (!aIsToday && bIsToday) return 1;
+          
+          const aIsFuture = dateA > today;
+          const bIsFuture = dateB > today;
+          
+          if (aIsFuture && bIsFuture) {
+            return dateA.getTime() - dateB.getTime();
+          }
+          
+          if (!aIsFuture && !bIsFuture) {
+            return dateB.getTime() - dateA.getTime();
+          }
+          
+          if (aIsFuture) return -1;
+          return 1;
         }),
       }));
   };
@@ -215,6 +222,7 @@ export default function TransactionsPage() {
       await queryClient.invalidateQueries({ queryKey: ['transactions'] });
       await queryClient.invalidateQueries({ queryKey: ['dailyBalance'] });
       toast.success('Transação salva com sucesso!');
+      window.location.reload();
     } catch (err: any) {
       console.error('Error saving preview:', err);
       toast.error('Erro ao salvar transação. Tente novamente.');
@@ -225,7 +233,7 @@ export default function TransactionsPage() {
     return typeof id === 'string' && id.startsWith('preview-');
   };
 
-  const openEdit = (t: Transaction | typeof previewTransactions[0]) => {
+  const openEdit = (t: Transaction) => {
     if (isPreview(t.id)) {
       toast.error('Transações preview não podem ser editadas. Salve-a primeiro.');
       return;
@@ -361,25 +369,36 @@ export default function TransactionsPage() {
         </Dialog>
 
         <div className="flex flex-wrap items-center gap-3">
-          <div className="relative flex-1 min-w-[160px]">
-            <Input
-              type="month"
+          <div className="flex-1 min-w-[160px]">
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              Mês
+            </label>
+            <MonthPicker
               value={filterMonth}
-              onChange={(e) => setFilterMonth(e.target.value)}
-              className="pl-10"
+              onChange={(month) => {
+                setFilterMonth(month);
+                setFilterDate('');
+              }}
+              className="w-full"
             />
-            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
           </div>
           
-          <div className="relative flex-1 min-w-[160px]">
-            <Input
-              type="date"
-              value={filterDate}
-              onChange={(e) => setFilterDate(e.target.value)}
-              placeholder="Data exata"
-              className="pl-10"
+          <div className="flex-1 min-w-[160px]">
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              Data Específica
+            </label>
+            <DatePicker
+              value={filterDate || ''}
+              onChange={(date) => {
+                setFilterDate(date);
+                if (date) {
+                  const [year, month] = date.split('-');
+                  setFilterMonth(`${year}-${month}`);
+                }
+              }}
+              placeholder="Selecione uma data"
+              className="w-full"
             />
-            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
           </div>
         </div>
 
