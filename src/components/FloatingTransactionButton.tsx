@@ -1,15 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, X, Loader2 } from 'lucide-react';
+import { Plus, X, Loader2, ChevronDown } from 'lucide-react';
 import { transactionService } from '@/lib/api/transaction.service';
 import { useToast } from '@/contexts/ToastContext';
 import { useQueryClient } from '@tanstack/react-query';
 import { usePreviewTransactions } from '@/contexts/PreviewTransactionContext';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/Select';
 import DatePicker from '@/components/ui/DatePicker';
 import { formatISODate } from '@/lib/utils/format';
 
@@ -23,6 +22,8 @@ interface TransactionFormData {
 export default function FloatingTransactionButton() {
   const [isOpen, setIsOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isTypePickerOpen, setIsTypePickerOpen] = useState(false);
+  const typePickerRef = useRef<HTMLDivElement>(null);
   const { success, error } = useToast();
   const queryClient = useQueryClient();
   const { addPreview } = usePreviewTransactions();
@@ -55,6 +56,24 @@ export default function FloatingTransactionButton() {
       }
     };
   }, [isOpen]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+      if (typePickerRef.current && !typePickerRef.current.contains(event.target as Node)) {
+        setIsTypePickerOpen(false);
+      }
+    };
+
+    if (isTypePickerOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [isTypePickerOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -187,24 +206,111 @@ export default function FloatingTransactionButton() {
                   />
                 </div>
 
-                <div>
+                <div ref={typePickerRef} className="relative">
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Tipo
                   </label>
-                  <Select
-                    value={formData.type}
-                    onValueChange={(value: 'income' | 'expense') =>
-                      setFormData({ ...formData, type: value })
-                    }
+                  <button
+                    type="button"
+                    onClick={() => setIsTypePickerOpen(!isTypePickerOpen)}
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100 focus:border-transparent transition-all flex items-center justify-between touch-manipulation"
                   >
-                    <SelectTrigger className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="expense">Despesa</SelectItem>
-                      <SelectItem value="income">Receita</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    <span className={formData.type ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500'}>
+                      {formData.type === 'income' ? 'Receita' : formData.type === 'expense' ? 'Despesa' : 'Selecione o tipo'}
+                    </span>
+                    <ChevronDown className={`w-4 h-4 text-gray-400 dark:text-gray-500 transition-transform ${isTypePickerOpen ? 'rotate-180' : ''}`} />
+                  </button>
+
+                  <AnimatePresence>
+                    {isTypePickerOpen && (
+                      <>
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[100] md:hidden"
+                          onClick={() => setIsTypePickerOpen(false)}
+                        />
+                        <motion.div
+                          initial={{ opacity: 0, y: 100 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 100 }}
+                          transition={{ duration: 0.3, ease: 'easeOut' }}
+                          className="fixed md:absolute z-[101] md:z-50 mt-0 md:mt-2 bg-white dark:bg-gray-900 rounded-t-2xl md:rounded-xl shadow-2xl border-t md:border border-gray-200 dark:border-gray-800 p-4 w-full md:w-full bottom-0 md:bottom-auto left-0 md:left-auto"
+                          style={{ 
+                            paddingBottom: 'max(1rem, env(safe-area-inset-bottom))'
+                          }}
+                        >
+                          <div className="space-y-2">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setFormData({ ...formData, type: 'expense' });
+                                setIsTypePickerOpen(false);
+                              }}
+                              className={`w-full px-4 py-3 rounded-lg text-left transition-colors touch-manipulation ${
+                                formData.type === 'expense'
+                                  ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900'
+                                  : 'bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
+                              }`}
+                            >
+                              Despesa
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setFormData({ ...formData, type: 'income' });
+                                setIsTypePickerOpen(false);
+                              }}
+                              className={`w-full px-4 py-3 rounded-lg text-left transition-colors touch-manipulation ${
+                                formData.type === 'income'
+                                  ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900'
+                                  : 'bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
+                              }`}
+                            >
+                              Receita
+                            </button>
+                          </div>
+                        </motion.div>
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                          animate={{ opacity: 1, scale: 1, y: 0 }}
+                          exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                          transition={{ duration: 0.2 }}
+                          className="hidden md:block absolute z-50 mt-2 w-full bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-800 p-1"
+                        >
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setFormData({ ...formData, type: 'expense' });
+                              setIsTypePickerOpen(false);
+                            }}
+                            className={`w-full px-4 py-2 rounded-md text-left transition-colors ${
+                              formData.type === 'expense'
+                                ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white'
+                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
+                            }`}
+                          >
+                            Despesa
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setFormData({ ...formData, type: 'income' });
+                              setIsTypePickerOpen(false);
+                            }}
+                            className={`w-full px-4 py-2 rounded-md text-left transition-colors ${
+                              formData.type === 'income'
+                                ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white'
+                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
+                            }`}
+                          >
+                            Receita
+                          </button>
+                        </motion.div>
+                      </>
+                    )}
+                  </AnimatePresence>
                 </div>
 
                 <div>
