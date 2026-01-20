@@ -376,7 +376,8 @@ export default function TransactionsPage() {
                   <div className="divide-y divide-gray-200 dark:divide-gray-800">
                     {group.transactions.map((transaction) => {
                       const isPreviewTransaction = isPreview(transaction.id);
-                      const remaining = isPreviewTransaction ? timeRemaining[transaction.id] : null;
+                      const previewId = isPreviewTransaction && typeof transaction.id === 'string' ? transaction.id : null;
+                      const remaining = isPreviewTransaction && previewId ? timeRemaining[previewId] : null;
                       
                       return (
                         <motion.div
@@ -431,11 +432,11 @@ export default function TransactionsPage() {
                                 <CurrencyDisplay value={transaction.amount} />
                               </div>
                               <div className="flex items-center gap-1">
-                                {isPreviewTransaction && typeof transaction.id === 'string' ? (
+                                {isPreviewTransaction && previewId ? (
                                   <Button
                                     variant="default"
                                     size="sm"
-                                    onClick={() => handleSavePreview(transaction.id)}
+                                    onClick={() => handleSavePreview(previewId)}
                                     className="flex items-center gap-1.5"
                                     title="Salvar transação"
                                   >
