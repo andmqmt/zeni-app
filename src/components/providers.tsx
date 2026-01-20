@@ -7,6 +7,7 @@ import { LanguageProvider } from '@/contexts/LanguageContext';
 import { BalanceVisibilityProvider } from '@/contexts/BalanceVisibilityContext';
 import { ToastProvider } from '@/contexts/ToastContext';
 import { LoadingProvider } from '@/contexts/LoadingContext';
+import { PreviewTransactionProvider } from '@/contexts/PreviewTransactionContext';
 
 interface ProvidersProps {
   children: ReactNode;
@@ -31,10 +32,12 @@ export function Providers({ children }: ProvidersProps) {
         <LanguageProvider>
           <LoadingProvider>
             <BalanceVisibilityProvider>
-              <ToastProvider>
-                <ThemeColorSync />
-                {children}
-              </ToastProvider>
+              <PreviewTransactionProvider>
+                <ToastProvider>
+                  <ThemeColorSync />
+                  {children}
+                </ToastProvider>
+              </PreviewTransactionProvider>
             </BalanceVisibilityProvider>
           </LoadingProvider>
         </LanguageProvider>
