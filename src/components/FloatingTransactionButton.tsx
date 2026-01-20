@@ -145,7 +145,7 @@ export default function FloatingTransactionButton() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[90]"
               onClick={handleClose}
             />
             
@@ -153,7 +153,7 @@ export default function FloatingTransactionButton() {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="fixed bottom-0 left-0 right-0 md:bottom-auto md:left-auto md:right-8 md:top-1/2 md:-translate-y-1/2 w-full md:w-[420px] max-h-[90vh] md:max-h-[600px] bg-white dark:bg-gray-900 rounded-t-2xl md:rounded-2xl shadow-2xl border-t md:border border-gray-200 dark:border-gray-800 z-50 overflow-hidden flex flex-col"
+              className="fixed bottom-0 left-0 right-0 md:bottom-auto md:left-auto md:right-8 md:top-1/2 md:-translate-y-1/2 w-full md:w-[420px] max-h-[90vh] md:max-h-[600px] bg-white dark:bg-gray-900 rounded-t-2xl md:rounded-2xl shadow-2xl border-t md:border border-gray-200 dark:border-gray-800 z-[91] overflow-hidden flex flex-col"
               style={{ maxHeight: 'calc(var(--vh, 100vh) - 2rem)' }}
               onClick={(e) => e.stopPropagation()}
             >
@@ -286,7 +286,7 @@ export default function FloatingTransactionButton() {
 
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-4 right-4 md:bottom-8 md:right-8 w-14 h-14 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-full shadow-2xl flex items-center justify-center z-40 hover:scale-110 transition-transform"
+        className="fixed bottom-4 right-4 md:bottom-8 md:right-8 w-14 h-14 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-full shadow-2xl flex items-center justify-center z-[80] hover:scale-110 transition-transform"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
         initial={{ scale: 0 }}
