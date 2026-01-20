@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { useDailyBalance, useTransactions } from '@/hooks/useTransactions';
+import { useDailyBalance } from '@/hooks/useTransactions';
+import { useTransactionsWithPreview } from '@/hooks/useTransactionsWithPreview';
 import { useProfile } from '@/hooks/useUser';
 import CurrencyDisplay from '@/components/CurrencyDisplay';
 import { TrendingUp, TrendingDown, Wallet, ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
@@ -22,7 +23,7 @@ export default function DashboardPage() {
   const monthEnd = new Date(selectedYear, selectedMonth, 0);
   const startISO = formatISODate(monthStart);
   const endISO = formatISODate(monthEnd);
-  const { data: transactions, isLoading: txLoading } = useTransactions();
+  const { data: transactions, isLoading: txLoading } = useTransactionsWithPreview();
 
   const { data: dailyBalance, isLoading: balanceLoading } = useDailyBalance({
     year: selectedYear,
