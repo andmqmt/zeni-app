@@ -91,7 +91,11 @@ export default function TransactionsPage() {
       .map(([monthKey, groupTxs]) => ({
         monthKey,
         monthLabel: formatMonthYear(groupTxs[0].transaction_date),
-        transactions: groupTxs,
+        transactions: groupTxs.sort((a, b) => {
+          const dateA = new Date(a.transaction_date).getTime();
+          const dateB = new Date(b.transaction_date).getTime();
+          return dateB - dateA;
+        }),
       }));
   };
 
