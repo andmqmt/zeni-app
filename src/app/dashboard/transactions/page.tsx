@@ -5,7 +5,6 @@ import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   useTransactions,
-  useCreateTransaction,
   useDeleteTransaction,
   useUpdateTransaction,
 } from "@/hooks/useTransactions";
@@ -13,11 +12,8 @@ import { formatCurrency, formatDate, formatDateShort, formatMonthYear, formatISO
 import { handleApiError } from "@/lib/utils/error";
 import { useToast } from "@/contexts/ToastContext";
 import {
-  Plus,
   Pencil,
   Trash2,
-  TrendingUp,
-  TrendingDown,
   Calendar,
   Filter,
 } from "lucide-react";
@@ -26,10 +22,11 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import Loading from "@/components/Loading";
 import PageTransition from "@/components/PageTransition";
 import CurrencyDisplay from "@/components/CurrencyDisplay";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/Dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/Dialog";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
+import DatePicker from "@/components/ui/DatePicker";
 
 export default function TransactionsPage() {
   const currentDate = new Date();
@@ -69,6 +66,10 @@ export default function TransactionsPage() {
     if (!filterMonth) return true;
     const txMonth = t.transaction_date.substring(0, 7);
     return txMonth === filterMonth;
+  })?.sort((a, b) => {
+    const dateA = new Date(a.transaction_date).getTime();
+    const dateB = new Date(b.transaction_date).getTime();
+    return dateB - dateA;
   });
 
   const groupTransactionsByMonth = (txs: Transaction[] | undefined) => {
@@ -91,16 +92,11 @@ export default function TransactionsPage() {
       .map(([monthKey, groupTxs]) => ({
         monthKey,
         monthLabel: formatMonthYear(groupTxs[0].transaction_date),
-        transactions: groupTxs.sort((a, b) => {
-          const dateA = new Date(a.transaction_date).getTime();
-          const dateB = new Date(b.transaction_date).getTime();
-          return dateB - dateA;
-        }),
+        transactions: groupTxs,
       }));
   };
 
   const groupedTransactions = groupTransactionsByMonth(transactions);
-  const createMutation = useCreateTransaction();
   const deleteMutation = useDeleteTransaction();
   const updateMutation = useUpdateTransaction();
 
@@ -108,14 +104,11 @@ export default function TransactionsPage() {
     e.preventDefault();
     setError("");
 
+    if (!editingId) return;
+
     try {
-      if (editingId) {
-        await updateMutation.mutateAsync({ id: editingId, data: formData });
-        toast.success("Transação atualizada!");
-      } else {
-        await createMutation.mutateAsync(formData);
-        toast.success("Transação criada!");
-      }
+      await updateMutation.mutateAsync({ id: editingId, data: formData });
+      toast.success("Transação atualizada!");
       setFormData({
         description: "",
         amount: 0,
@@ -163,130 +156,117 @@ export default function TransactionsPage() {
           <h1 className="text-3xl font-semibold text-gray-900 dark:text-white">
             Transações
           </h1>
-          <Dialog open={showForm} onOpenChange={setShowForm}>
-            <DialogTrigger asChild>
-              <Button className="flex items-center gap-2">
-                <Plus className="h-4 w-4" />
-                Nova
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>{editingId ? "Editar Transação" : "Nova Transação"}</DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-                {error && (
-                  <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg p-3 text-sm text-red-700 dark:text-red-300">
-                    {error}
-                  </div>
-                )}
-                
+        </div>
+
+        <Dialog open={showForm} onOpenChange={setShowForm}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Editar Transação</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+              {error && (
+                <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg p-3 text-sm text-red-700 dark:text-red-300">
+                  {error}
+                </div>
+              )}
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Descrição
+                </label>
+                <Input
+                  type="text"
+                  required
+                  placeholder="Ex: Supermercado"
+                  value={formData.description}
+                  onChange={(e) =>
+                    setFormData({ ...formData, description: e.target.value })
+                  }
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Descrição
+                    Valor
                   </label>
                   <Input
-                    type="text"
+                    type="number"
+                    step="0.01"
                     required
-                    placeholder="Ex: Supermercado"
-                    value={formData.description}
+                    placeholder="0,00"
+                    value={formData.amount}
                     onChange={(e) =>
-                      setFormData({ ...formData, description: e.target.value })
+                      setFormData({
+                        ...formData,
+                        amount: parseFloat(e.target.value),
+                      })
                     }
                   />
                 </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Valor
-                    </label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      required
-                      placeholder="0,00"
-                      value={formData.amount}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          amount: parseFloat(e.target.value),
-                        })
-                      }
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Data
-                    </label>
-                    <Input
-                      type="date"
-                      required
-                      value={formData.transaction_date}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          transaction_date: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
-                </div>
-
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Tipo
+                    Data
                   </label>
-                  <Select
-                    value={formData.type}
-                    onValueChange={(value: "income" | "expense") =>
-                      setFormData({ ...formData, type: value })
+                  <DatePicker
+                    value={formData.transaction_date}
+                    onChange={(date) =>
+                      setFormData({ ...formData, transaction_date: date })
                     }
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="expense">Despesa</SelectItem>
-                      <SelectItem value="income">Receita</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    className="w-full"
+                  />
                 </div>
+              </div>
 
-                <div className="flex gap-3 pt-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                      setShowForm(false);
-                      setEditingId(null);
-                      setFormData({
-                        description: "",
-                        amount: 0,
-                        type: "expense",
-                        transaction_date: formatISODate(new Date()),
-                      });
-                    }}
-                    className="flex-1"
-                  >
-                    Cancelar
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={createMutation.isPending || updateMutation.isPending}
-                    className="flex-1"
-                  >
-                    {createMutation.isPending || updateMutation.isPending
-                      ? "Salvando..."
-                      : editingId
-                      ? "Atualizar"
-                      : "Salvar"}
-                  </Button>
-                </div>
-              </form>
-            </DialogContent>
-          </Dialog>
-        </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Tipo
+                </label>
+                <Select
+                  value={formData.type}
+                  onValueChange={(value: "income" | "expense") =>
+                    setFormData({ ...formData, type: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="expense">Despesa</SelectItem>
+                    <SelectItem value="income">Receita</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setShowForm(false);
+                    setEditingId(null);
+                    setFormData({
+                      description: "",
+                      amount: 0,
+                      type: "expense",
+                      transaction_date: formatISODate(new Date()),
+                    });
+                  }}
+                  className="flex-1"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={updateMutation.isPending}
+                  className="flex-1"
+                >
+                  {updateMutation.isPending ? "Salvando..." : "Atualizar"}
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
 
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative flex-1 min-w-[160px]">
