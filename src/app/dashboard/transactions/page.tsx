@@ -431,7 +431,7 @@ export default function TransactionsPage() {
                                 <CurrencyDisplay value={transaction.amount} />
                               </div>
                               <div className="flex items-center gap-1">
-                                {isPreviewTransaction ? (
+                                {isPreviewTransaction && typeof transaction.id === 'string' ? (
                                   <Button
                                     variant="default"
                                     size="sm"
