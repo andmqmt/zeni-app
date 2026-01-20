@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useDailyBalance } from '@/hooks/useTransactions';
 import { useTransactionsWithPreview } from '@/hooks/useTransactionsWithPreview';
 import { useProfile } from '@/hooks/useUser';
+import { usePreviewTransactions } from '@/contexts/PreviewTransactionContext';
 import CurrencyDisplay from '@/components/CurrencyDisplay';
 import { TrendingUp, TrendingDown, Wallet, ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -12,6 +13,7 @@ import DayList from '@/components/DayList';
 import Loading from '@/components/Loading';
 import PageTransition from '@/components/PageTransition';
 import { formatISODate } from '@/lib/utils/format';
+import { combineDailyBalancesWithPreviews } from '@/lib/utils/dailyBalanceWithPreview';
 
 export default function DashboardPage() {
   const currentDate = new Date();
@@ -24,13 +26,25 @@ export default function DashboardPage() {
   const startISO = formatISODate(monthStart);
   const endISO = formatISODate(monthEnd);
   const { data: transactions, isLoading: txLoading } = useTransactionsWithPreview();
+  const { previewTransactions } = usePreviewTransactions();
 
-  const { data: dailyBalance, isLoading: balanceLoading } = useDailyBalance({
+  const { data: backendDailyBalance, isLoading: balanceLoading } = useDailyBalance({
     year: selectedYear,
     month: selectedMonth,
   });
 
   const { data: profile } = useProfile();
+
+  const dailyBalance = useMemo(() => {
+    if (!backendDailyBalance) return [];
+    return combineDailyBalancesWithPreviews(
+      backendDailyBalance,
+      previewTransactions,
+      selectedYear,
+      selectedMonth,
+      profile?.preferences
+    );
+  }, [backendDailyBalance, previewTransactions, selectedYear, selectedMonth, profile?.preferences]);
 
   const toAmount = (v: unknown): number => {
     if (typeof v === 'number') return Number.isFinite(v) ? v : 0;

@@ -368,8 +368,8 @@ export default function TransactionsPage() {
           </DialogContent>
         </Dialog>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex-1 min-w-[160px]">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-3">
+          <div className="flex-1 min-w-0">
             <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
               Mês
             </label>
@@ -383,7 +383,7 @@ export default function TransactionsPage() {
             />
           </div>
           
-          <div className="flex-1 min-w-[160px]">
+          <div className="flex-1 min-w-0">
             <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
               Data Específica
             </label>

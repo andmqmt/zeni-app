@@ -28,15 +28,21 @@ export default function DatePicker({ value, onChange, className = '', placeholde
   const pickerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
       if (pickerRef.current && !pickerRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     };
 
     if (isOpen) {
+      document.body.style.overflow = 'hidden';
       document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
+      return () => {
+        document.body.style.overflow = '';
+        document.removeEventListener('mousedown', handleClickOutside);
+        document.removeEventListener('touchstart', handleClickOutside);
+      };
     }
   }, [isOpen]);
 
@@ -116,15 +122,18 @@ export default function DatePicker({ value, onChange, className = '', placeholde
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 md:hidden"
+              className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[100] md:hidden"
               onClick={() => setIsOpen(false)}
             />
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: -10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: -10 }}
-              transition={{ duration: 0.2 }}
-              className="fixed md:absolute z-50 mt-0 md:mt-2 bg-white dark:bg-gray-900 rounded-t-2xl md:rounded-xl shadow-2xl border-t md:border border-gray-200 dark:border-gray-800 p-4 md:p-4 w-full md:w-[280px] bottom-0 md:bottom-auto left-0 md:left-auto md:right-0 max-h-[80vh] md:max-h-none overflow-y-auto"
+              initial={{ opacity: 0, y: 100 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 100 }}
+              transition={{ duration: 0.3, ease: 'easeOut' }}
+              className="fixed md:absolute z-[101] mt-0 md:mt-2 bg-white dark:bg-gray-900 rounded-t-2xl md:rounded-xl shadow-2xl border-t md:border border-gray-200 dark:border-gray-800 p-4 md:p-4 w-full md:w-[280px] bottom-0 md:bottom-auto left-0 md:left-auto md:right-0 max-h-[85vh] md:max-h-none overflow-y-auto safe-area-inset-bottom"
+              style={{ 
+                paddingBottom: 'max(1rem, env(safe-area-inset-bottom))'
+              }}
             >
               <div className="flex items-center justify-between mb-4">
                 <button
