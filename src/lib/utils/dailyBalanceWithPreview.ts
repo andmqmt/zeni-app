@@ -17,12 +17,6 @@ export function combineDailyBalancesWithPreviews(
   month: number,
   preferences?: UserPreferences
 ): DailyBalance[] {
-  const combinedBalances: Map<string, DailyBalance> = new Map();
-
-  backendBalances.forEach((balance) => {
-    combinedBalances.set(balance.date, { ...balance });
-  });
-
   const monthStart = new Date(year, month - 1, 1);
   const monthEnd = new Date(year, month, 0);
   const startISO = formatISODate(monthStart);
@@ -32,7 +26,10 @@ export function combineDailyBalancesWithPreviews(
     (preview) => preview.transaction_date >= startISO && preview.transaction_date <= endISO
   );
 
-  const sortedBalances = Array.from(combinedBalances.values()).sort((a, b) => a.date.localeCompare(b.date));
+  const backendBalancesMap = new Map<string, DailyBalance>();
+  backendBalances.forEach((balance) => {
+    backendBalancesMap.set(balance.date, { ...balance });
+  });
 
   const previewsByDate = new Map<string, PreviewTransaction[]>();
   monthPreviews.forEach((preview) => {
@@ -43,34 +40,42 @@ export function combineDailyBalancesWithPreviews(
     previewsByDate.get(dateStr)!.push(preview);
   });
 
-  const allDates = new Set<string>();
-  sortedBalances.forEach((b) => allDates.add(b.date));
-  previewsByDate.forEach((_, date) => allDates.add(date));
-  
-  const sortedDates = Array.from(allDates).sort((a, b) => a.localeCompare(b));
-
+  const daysInMonth = monthEnd.getDate();
   const result: DailyBalance[] = [];
 
-  for (let i = 0; i < sortedDates.length; i++) {
-    const dateStr = sortedDates[i];
-    const existing = combinedBalances.get(dateStr);
-    const dayPreviews = previewsByDate.get(dateStr) || [];
+  for (let day = 1; day <= daysInMonth; day++) {
+    const date = new Date(year, month - 1, day);
+    const dateStr = formatISODate(date);
     
-    const previewImpact = dayPreviews.reduce((sum, p) => {
+    const dayPreviews = previewsByDate.get(dateStr) || [];
+    const dayPreviewImpact = dayPreviews.reduce((sum, p) => {
       return sum + (p.type === 'income' ? p.amount : -p.amount);
     }, 0);
 
+    let cumulativePreviewImpact = 0;
+    for (let d = 1; d <= day; d++) {
+      const checkDate = new Date(year, month - 1, d);
+      const checkDateStr = formatISODate(checkDate);
+      const checkPreviews = previewsByDate.get(checkDateStr) || [];
+      cumulativePreviewImpact += checkPreviews.reduce((sum, p) => {
+        return sum + (p.type === 'income' ? p.amount : -p.amount);
+      }, 0);
+    }
+
+    const existing = backendBalancesMap.get(dateStr);
+    
     let balance: number;
     let status: DailyBalance['status'];
 
     if (existing) {
-      balance = existing.balance + previewImpact;
+      balance = existing.balance + cumulativePreviewImpact;
       status = preferences ? getBalanceStatus(balance, preferences) : existing.status;
     } else {
-      if (i === 0) {
-        balance = previewImpact;
+      if (day === 1) {
+        balance = cumulativePreviewImpact;
       } else {
-        balance = result[i - 1].balance + previewImpact;
+        const prevBalance = result[result.length - 1].balance;
+        balance = prevBalance + dayPreviewImpact;
       }
       status = preferences ? getBalanceStatus(balance, preferences) : null;
     }
@@ -80,29 +85,6 @@ export function combineDailyBalancesWithPreviews(
       balance,
       status,
     });
-  }
-
-  for (let i = 1; i < result.length; i++) {
-    const currentDate = new Date(result[i].date);
-    const prevDate = new Date(result[i - 1].date);
-    const daysDiff = Math.floor((currentDate.getTime() - prevDate.getTime()) / (1000 * 60 * 60 * 24));
-    
-    if (daysDiff > 1) {
-      const insertions: DailyBalance[] = [];
-      for (let day = 1; day < daysDiff; day++) {
-        const missingDate = new Date(prevDate);
-        missingDate.setDate(missingDate.getDate() + day);
-        const missingDateStr = formatISODate(missingDate);
-        
-        insertions.push({
-          date: missingDateStr,
-          balance: result[i - 1].balance,
-          status: result[i - 1].status,
-        });
-      }
-      result.splice(i, 0, ...insertions);
-      i += insertions.length;
-    }
   }
 
   return result;
