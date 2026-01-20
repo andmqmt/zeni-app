@@ -111,81 +111,92 @@ export default function DatePicker({ value, onChange, className = '', placeholde
 
       <AnimatePresence>
         {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: -10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: -10 }}
-            transition={{ duration: 0.2 }}
-            className="absolute z-50 mt-2 bg-white dark:bg-gray-900 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-800 p-4 w-[calc(100vw-2rem)] max-w-[280px] left-1/2 -translate-x-1/2 md:left-auto md:right-0 md:translate-x-0"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <button
-                type="button"
-                onClick={() => navigateMonth('prev')}
-                className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-              >
-                <ChevronLeft className="w-4 h-4 text-gray-700 dark:text-gray-300" />
-              </button>
-              <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
-                {months[currentMonth.month]} {currentMonth.year}
-              </h3>
-              <button
-                type="button"
-                onClick={() => navigateMonth('next')}
-                className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-              >
-                <ChevronRight className="w-4 h-4 text-gray-700 dark:text-gray-300" />
-              </button>
-            </div>
-
-            <div className="grid grid-cols-7 gap-1 mb-2">
-              {weekDays.map((day) => (
-                <div
-                  key={day}
-                  className="text-xs font-medium text-gray-500 dark:text-gray-400 text-center py-1"
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 md:hidden"
+              onClick={() => setIsOpen(false)}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: -10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: -10 }}
+              transition={{ duration: 0.2 }}
+              className="fixed md:absolute z-50 mt-0 md:mt-2 bg-white dark:bg-gray-900 rounded-t-2xl md:rounded-xl shadow-2xl border-t md:border border-gray-200 dark:border-gray-800 p-4 md:p-4 w-full md:w-[280px] bottom-0 md:bottom-auto left-0 md:left-auto md:right-0 max-h-[80vh] md:max-h-none overflow-y-auto"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <button
+                  type="button"
+                  onClick={() => navigateMonth('prev')}
+                  className="p-2 md:p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-700 transition-colors touch-manipulation"
+                  aria-label="Mês anterior"
                 >
-                  {day}
-                </div>
-              ))}
-            </div>
+                  <ChevronLeft className="w-5 h-5 md:w-4 md:h-4 text-gray-700 dark:text-gray-300" />
+                </button>
+                <h3 className="font-semibold text-gray-900 dark:text-white text-base md:text-sm">
+                  {months[currentMonth.month]} {currentMonth.year}
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => navigateMonth('next')}
+                  className="p-2 md:p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-700 transition-colors touch-manipulation"
+                  aria-label="Próximo mês"
+                >
+                  <ChevronRight className="w-5 h-5 md:w-4 md:h-4 text-gray-700 dark:text-gray-300" />
+                </button>
+              </div>
 
-            <div className="grid grid-cols-7 gap-1">
-              {days.map((day, index) => {
-                if (day === null) {
-                  return <div key={`empty-${index}`} className="aspect-square" />;
-                }
-
-                const date = new Date(currentMonth.year, currentMonth.month, day);
-                const today = isToday(date);
-                const selected = isSelected(date);
-
-                return (
-                  <button
+              <div className="grid grid-cols-7 gap-1 md:gap-1 mb-2">
+                {weekDays.map((day) => (
+                  <div
                     key={day}
-                    type="button"
-                    onClick={() => handleDateSelect(day)}
-                    className={`aspect-square rounded-lg text-sm font-medium transition-all ${
-                      selected
-                        ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900'
-                        : today
-                        ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white font-semibold'
-                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
-                    }`}
+                    className="text-xs md:text-xs font-medium text-gray-500 dark:text-gray-400 text-center py-2 md:py-1"
                   >
                     {day}
-                  </button>
-                );
-              })}
-            </div>
+                  </div>
+                ))}
+              </div>
 
-            <button
-              type="button"
-              onClick={goToToday}
-              className="w-full mt-3 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-            >
-              Hoje
-            </button>
-          </motion.div>
+              <div className="grid grid-cols-7 gap-1.5 md:gap-1">
+                {days.map((day, index) => {
+                  if (day === null) {
+                    return <div key={`empty-${index}`} className="aspect-square" />;
+                  }
+
+                  const date = new Date(currentMonth.year, currentMonth.month, day);
+                  const today = isToday(date);
+                  const selected = isSelected(date);
+
+                  return (
+                    <button
+                      key={day}
+                      type="button"
+                      onClick={() => handleDateSelect(day)}
+                      className={`aspect-square rounded-lg text-sm md:text-sm font-medium transition-all touch-manipulation min-h-[44px] md:min-h-0 ${
+                        selected
+                          ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900'
+                          : today
+                          ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white font-semibold'
+                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-700'
+                      }`}
+                    >
+                      {day}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button
+                type="button"
+                onClick={goToToday}
+                className="w-full mt-4 md:mt-3 px-4 md:px-3 py-3 md:py-2 text-sm md:text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-700 rounded-lg transition-colors touch-manipulation"
+              >
+                Hoje
+              </button>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </div>

@@ -6,6 +6,7 @@ import { Plus, X, Loader2 } from 'lucide-react';
 import { transactionService } from '@/lib/api/transaction.service';
 import { useToast } from '@/contexts/ToastContext';
 import { useQueryClient } from '@tanstack/react-query';
+import { usePreviewTransactions } from '@/contexts/PreviewTransactionContext';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/Select';
@@ -24,6 +25,7 @@ export default function FloatingTransactionButton() {
   const [isProcessing, setIsProcessing] = useState(false);
   const { success, error } = useToast();
   const queryClient = useQueryClient();
+  const { addPreview } = usePreviewTransactions();
 
   const [formData, setFormData] = useState<TransactionFormData>({
     description: '',
@@ -94,6 +96,33 @@ export default function FloatingTransactionButton() {
     } finally {
       setIsProcessing(false);
     }
+  };
+
+  const handlePreview = () => {
+    if (!formData.description.trim() || formData.amount <= 0) {
+      error('Preencha todos os campos corretamente');
+      return;
+    }
+
+    addPreview({
+      description: formData.description,
+      amount: formData.amount,
+      type: formData.type,
+      transaction_date: formData.transaction_date,
+    });
+
+    success('Transação preview criada! Ela desaparecerá em 1 minuto.');
+    
+    setFormData({
+      description: '',
+      amount: 0,
+      type: 'expense',
+      transaction_date: formatISODate(new Date()),
+    });
+    
+    setTimeout(() => {
+      setIsOpen(false);
+    }, 500);
   };
 
   const handleClose = () => {
@@ -224,6 +253,15 @@ export default function FloatingTransactionButton() {
                     className="flex-1"
                   >
                     Cancelar
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handlePreview}
+                    disabled={isProcessing}
+                    className="flex-1"
+                  >
+                    Preview
                   </Button>
                   <Button
                     type="submit"

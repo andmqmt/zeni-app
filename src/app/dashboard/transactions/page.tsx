@@ -8,6 +8,7 @@ import {
   useDeleteTransaction,
   useUpdateTransaction,
 } from "@/hooks/useTransactions";
+import { useQueryClient } from "@tanstack/react-query";
 import { formatCurrency, formatDate, formatDateShort, formatMonthYear, formatISODate } from "@/lib/utils/format";
 import { handleApiError } from "@/lib/utils/error";
 import { useToast } from "@/contexts/ToastContext";
@@ -19,6 +20,7 @@ import {
 } from "lucide-react";
 import { Transaction, TransactionCreate } from "@/types";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { usePreviewTransactions } from "@/contexts/PreviewTransactionContext";
 import Loading from "@/components/Loading";
 import PageTransition from "@/components/PageTransition";
 import CurrencyDisplay from "@/components/CurrencyDisplay";
@@ -27,6 +29,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
 import DatePicker from "@/components/ui/DatePicker";
+import { Save, Clock } from "lucide-react";
 
 export default function TransactionsPage() {
   const currentDate = new Date();
@@ -39,8 +42,11 @@ export default function TransactionsPage() {
   const [filterDate, setFilterDate] = useState("");
   const [filterMonth, setFilterMonth] = useState<string>(`${currentYear}-${String(currentMonth).padStart(2, '0')}`);
   const [error, setError] = useState("");
+  const [timeRemaining, setTimeRemaining] = useState<{ [key: string]: number }>({});
   const { t } = useLanguage();
   const toast = useToast();
+  const queryClient = useQueryClient();
+  const { previewTransactions, savePreview, removePreview } = usePreviewTransactions();
 
   useEffect(() => {
     const dateParam = searchParams.get('date');
@@ -62,20 +68,33 @@ export default function TransactionsPage() {
     on_date: filterDate || undefined,
   });
 
-  const transactions = allTransactions?.filter((t) => {
+  const realTransactions = allTransactions?.filter((t) => {
     if (!filterMonth) return true;
     const txMonth = t.transaction_date.substring(0, 7);
     return txMonth === filterMonth;
-  })?.sort((a, b) => {
-    const dateA = new Date(a.transaction_date).getTime();
-    const dateB = new Date(b.transaction_date).getTime();
+  }) || [];
+
+  const filteredPreviews = previewTransactions.filter((t) => {
+    if (!filterMonth) return true;
+    const txMonth = t.transaction_date.substring(0, 7);
+    return txMonth === filterMonth;
+  });
+
+  const allTransactionsCombined: (Transaction | typeof previewTransactions[0])[] = [
+    ...realTransactions,
+    ...filteredPreviews,
+  ].sort((a, b) => {
+    const dateA = new Date(a.transaction_date + 'T00:00:00').getTime();
+    const dateB = new Date(b.transaction_date + 'T00:00:00').getTime();
     return dateB - dateA;
   });
 
-  const groupTransactionsByMonth = (txs: Transaction[] | undefined) => {
+  const transactions = allTransactionsCombined;
+
+  const groupTransactionsByMonth = (txs: (Transaction | typeof previewTransactions[0])[] | undefined) => {
     if (!txs) return [];
     
-    const groups: { [key: string]: Transaction[] } = {};
+    const groups: { [key: string]: (Transaction | typeof previewTransactions[0])[] } = {};
     
     txs.forEach((transaction) => {
       const date = new Date(transaction.transaction_date);
@@ -92,7 +111,11 @@ export default function TransactionsPage() {
       .map(([monthKey, groupTxs]) => ({
         monthKey,
         monthLabel: formatMonthYear(groupTxs[0].transaction_date),
-        transactions: groupTxs,
+        transactions: groupTxs.sort((a, b) => {
+          const dateA = new Date(a.transaction_date + 'T00:00:00').getTime();
+          const dateB = new Date(b.transaction_date + 'T00:00:00').getTime();
+          return dateB - dateA;
+        }),
       }));
   };
 
@@ -124,10 +147,15 @@ export default function TransactionsPage() {
     }
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: number | string) => {
+    if (isPreview(id)) {
+      removePreview(id);
+      toast.success("Preview removido");
+      return;
+    }
     if (confirm("Excluir esta transação?")) {
       try {
-        await deleteMutation.mutateAsync(id);
+        await deleteMutation.mutateAsync(id as number);
         toast.success("Transação excluída!");
       } catch (err) {
         const errorMessage = handleApiError(err);
@@ -137,8 +165,44 @@ export default function TransactionsPage() {
     }
   };
 
-  const openEdit = (t: Transaction) => {
-    setEditingId(t.id);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = Date.now();
+      const remaining: { [key: string]: number } = {};
+      previewTransactions.forEach((preview) => {
+        const remainingMs = preview.expiresAt - now;
+        if (remainingMs > 0) {
+          remaining[preview.id] = Math.ceil(remainingMs / 1000);
+        }
+      });
+      setTimeRemaining(remaining);
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [previewTransactions]);
+
+  const handleSavePreview = async (id: string) => {
+    try {
+      await savePreview(id);
+      await queryClient.invalidateQueries({ queryKey: ['transactions'] });
+      await queryClient.invalidateQueries({ queryKey: ['dailyBalance'] });
+      toast.success('Transação salva com sucesso!');
+    } catch (err: any) {
+      console.error('Error saving preview:', err);
+      toast.error('Erro ao salvar transação. Tente novamente.');
+    }
+  };
+
+  const isPreview = (id: number | string): id is string => {
+    return typeof id === 'string' && id.startsWith('preview-');
+  };
+
+  const openEdit = (t: Transaction | typeof previewTransactions[0]) => {
+    if (isPreview(t.id)) {
+      toast.error('Transações preview não podem ser editadas. Salve-a primeiro.');
+      return;
+    }
+    setEditingId(t.id as number);
     setFormData({
       description: t.description,
       amount: t.amount,
@@ -310,62 +374,100 @@ export default function TransactionsPage() {
                     </h3>
                   </div>
                   <div className="divide-y divide-gray-200 dark:divide-gray-800">
-                    {group.transactions.map((transaction) => (
-                      <motion.div
-                        key={transaction.id}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
-                      >
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                          <div className="flex items-start gap-3 flex-1 min-w-0">
-                            <div className={`mt-1 w-2 h-2 rounded-full flex-shrink-0 ${
-                              transaction.type === "income" ? "bg-green-500" : "bg-red-500"
-                            }`} />
-                            <div className="flex-1 min-w-0">
-                              <h4 className="font-medium text-gray-900 dark:text-white truncate">
-                                {transaction.description}
-                              </h4>
-                              <div className="flex items-center gap-2 mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                <span>{formatDateShort(transaction.transaction_date)}</span>
-                                <span>•</span>
-                                <span className={transaction.type === "income" ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}>
-                                  {transaction.type === "income" ? "Receita" : "Despesa"}
-                                </span>
+                    {group.transactions.map((transaction) => {
+                      const isPreviewTransaction = isPreview(transaction.id);
+                      const remaining = isPreviewTransaction ? timeRemaining[transaction.id] : null;
+                      
+                      return (
+                        <motion.div
+                          key={transaction.id}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          className={`p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors ${
+                            isPreviewTransaction ? 'bg-yellow-50/50 dark:bg-yellow-950/10 border-l-2 border-yellow-400 dark:border-yellow-600' : ''
+                          }`}
+                        >
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                            <div className="flex items-start gap-3 flex-1 min-w-0">
+                              <div className={`mt-1 w-2 h-2 rounded-full flex-shrink-0 ${
+                                transaction.type === "income" ? "bg-green-500" : "bg-red-500"
+                              }`} />
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2">
+                                  <h4 className="font-medium text-gray-900 dark:text-white truncate">
+                                    {transaction.description}
+                                  </h4>
+                                  {isPreviewTransaction && (
+                                    <span className="px-2 py-0.5 text-xs font-medium bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 rounded-full">
+                                      Preview
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-2 mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                  <span>{formatDateShort(transaction.transaction_date)}</span>
+                                  <span>•</span>
+                                  <span className={transaction.type === "income" ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}>
+                                    {transaction.type === "income" ? "Receita" : "Despesa"}
+                                  </span>
+                                  {isPreviewTransaction && remaining !== null && remaining > 0 && (
+                                    <>
+                                      <span>•</span>
+                                      <span className="flex items-center gap-1 text-yellow-600 dark:text-yellow-400">
+                                        <Clock className="w-3 h-3" />
+                                        {remaining}s
+                                      </span>
+                                    </>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4">
+                              <div className={`text-lg font-semibold ${
+                                transaction.type === "income"
+                                  ? "text-green-600 dark:text-green-400"
+                                  : "text-red-600 dark:text-red-400"
+                              }`}>
+                                {transaction.type === "income" ? "+" : "-"}
+                                <CurrencyDisplay value={transaction.amount} />
+                              </div>
+                              <div className="flex items-center gap-1">
+                                {isPreviewTransaction ? (
+                                  <Button
+                                    variant="default"
+                                    size="sm"
+                                    onClick={() => handleSavePreview(transaction.id)}
+                                    className="flex items-center gap-1.5"
+                                    title="Salvar transação"
+                                  >
+                                    <Save className="h-3.5 w-3.5" />
+                                    Salvar
+                                  </Button>
+                                ) : (
+                                  <>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      onClick={() => openEdit(transaction)}
+                                      title="Editar"
+                                    >
+                                      <Pencil className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      onClick={() => handleDelete(transaction.id)}
+                                      title="Excluir"
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </>
+                                )}
                               </div>
                             </div>
                           </div>
-                          <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4">
-                            <div className={`text-lg font-semibold ${
-                              transaction.type === "income"
-                                ? "text-green-600 dark:text-green-400"
-                                : "text-red-600 dark:text-red-400"
-                            }`}>
-                              {transaction.type === "income" ? "+" : "-"}
-                              <CurrencyDisplay value={transaction.amount} />
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => openEdit(transaction)}
-                                title="Editar"
-                              >
-                                <Pencil className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => handleDelete(transaction.id)}
-                                title="Excluir"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      </motion.div>
-                    ))}
+                        </motion.div>
+                      );
+                    })}
                   </div>
                 </motion.div>
               ))}
