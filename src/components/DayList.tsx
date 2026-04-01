@@ -76,25 +76,25 @@ export default function DayList({ year, month, dailyBalances }: DayListProps) {
               key={day}
               onClick={() => handleDayClick(dateStr, hasBalance)}
               disabled={!hasBalance}
-              className={`w-full px-4 py-3.5 flex items-center justify-between transition-colors text-left ${
+              className={`group w-full px-5 py-4 flex items-center justify-between transition-all text-left ${
                 isToday
-                  ? 'bg-gray-50 dark:bg-gray-900'
+                  ? 'bg-gray-50 dark:bg-gray-900/40'
                   : hasBalance
-                    ? 'hover:bg-gray-50 dark:hover:bg-gray-900/50 cursor-pointer'
+                    ? 'hover:bg-gray-50 dark:hover:bg-gray-900/60 cursor-pointer'
                     : 'opacity-50'
               }`}
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-4 transition-transform group-hover:translate-x-1">
                 {/* Day badge — compact */}
-                <div className={`flex flex-col items-center justify-center w-10 h-10 rounded-xl ${
+                <div className={`flex flex-col items-center justify-center w-11 h-11 rounded-xl shadow-sm transition-colors ${
                   isToday
                     ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900'
-                    : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
+                    : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 group-hover:bg-white dark:group-hover:bg-gray-700 group-hover:text-gray-900 dark:group-hover:text-white group-hover:shadow-md'
                 }`}>
-                  <div className="text-[9px] font-medium uppercase leading-none mt-0.5">
+                  <div className="text-[10px] font-semibold uppercase tracking-wider mb-0.5 opacity-80">
                     {weekDayShort[date.getDay()]}
                   </div>
-                  <div className="text-sm font-semibold leading-none mt-0.5">
+                  <div className="text-base font-bold leading-none">
                     {day}
                   </div>
                 </div>
@@ -102,24 +102,29 @@ export default function DayList({ year, month, dailyBalances }: DayListProps) {
                 {/* Status info */}
                 <div>
                   {balance ? (
-                    <div className="flex items-center gap-1.5">
-                      <div className={`w-1.5 h-1.5 rounded-full ${statusDot(balance.status || '')}`} />
-                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-2 h-2 rounded-full ${statusDot(balance.status || '')} shadow-sm`} />
+                      <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
                         {balance.status === 'green' ? t('status.good') :
                          balance.status === 'yellow' ? t('status.regular') :
                          balance.status === 'red' ? t('status.bad') : t('status.notConfigured')}
                       </span>
                     </div>
                   ) : (
-                    <span className="text-[11px] text-gray-300 dark:text-gray-600">{t('calendar.noData')}</span>
+                    <span className="text-xs text-gray-400 dark:text-gray-500">{t('calendar.noData')}</span>
                   )}
                 </div>
               </div>
 
               {/* Balance value */}
               {balance && (
-                <div className="text-sm font-semibold text-gray-900 dark:text-white tabular-nums">
-                  {formatCurrency(balance.balance)}
+                <div className="flex items-center gap-3">
+                   <div className="text-base md:text-lg font-bold text-gray-900 dark:text-white tabular-nums tracking-tight">
+                     {formatCurrency(balance.balance)}
+                   </div>
+                   <div className="w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-200 transition-colors opacity-0 group-hover:opacity-100 -ml-2 group-hover:ml-0 hidden sm:flex">
+                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                   </div>
                 </div>
               )}
             </button>

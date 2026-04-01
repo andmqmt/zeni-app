@@ -269,8 +269,36 @@ export default function TransactionsPage() {
                 </div>
               )}
 
+              {/* Type Toggle — segmented control */}
+              <div className="grid grid-cols-2 gap-2 p-1 bg-gray-100 dark:bg-gray-900 rounded-xl">
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, type: 'expense' })}
+                  className={`flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                    formData.type === 'expense'
+                      ? 'bg-white dark:bg-gray-800 text-red-600 dark:text-red-400 shadow-sm'
+                      : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                  }`}
+                >
+                  <ArrowUpRight className="w-4 h-4" strokeWidth={2.5} />
+                  Despesa
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, type: 'income' })}
+                  className={`flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                    formData.type === 'income'
+                      ? 'bg-white dark:bg-gray-800 text-emerald-600 dark:text-emerald-400 shadow-sm'
+                      : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                  }`}
+                >
+                  <ArrowDownLeft className="w-4 h-4" strokeWidth={2.5} />
+                  Receita
+                </button>
+              </div>
+
               <div>
-                <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">
+                <label className="block text-[11px] font-medium text-gray-400 mb-1.5 uppercase tracking-wider">
                   Descrição
                 </label>
                 <Input
@@ -286,7 +314,7 @@ export default function TransactionsPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">
+                  <label className="block text-[11px] font-medium text-gray-400 mb-1.5 uppercase tracking-wider">
                     Valor
                   </label>
                   <Input
@@ -304,7 +332,7 @@ export default function TransactionsPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">
+                  <label className="block text-[11px] font-medium text-gray-400 mb-1.5 uppercase tracking-wider">
                     Data
                   </label>
                   <DatePicker
@@ -315,26 +343,6 @@ export default function TransactionsPage() {
                     className="w-full"
                   />
                 </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">
-                  Tipo
-                </label>
-                <Select
-                  value={formData.type}
-                  onValueChange={(value: "income" | "expense") =>
-                    setFormData({ ...formData, type: value })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="expense">Despesa</SelectItem>
-                    <SelectItem value="income">Receita</SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
 
               <div className="flex gap-3 pt-2">

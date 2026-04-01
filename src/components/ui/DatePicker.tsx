@@ -51,23 +51,10 @@ export default function DatePicker({ value, onChange, className = '', placeholde
     ? `${selectedDate.getDate().toString().padStart(2, '0')}/${(selectedDate.getMonth() + 1).toString().padStart(2, '0')}/${selectedDate.getFullYear()}`
     : placeholder;
 
-  const getDaysInMonth = (year: number, month: number) => {
-    return new Date(year, month + 1, 0).getDate();
-  };
-
-  const getFirstDayOfMonth = (year: number, month: number) => {
-    return new Date(year, month, 1).getDay();
-  };
-
-  const isToday = (date: Date) => {
-    const today = new Date();
-    return date.toDateString() === today.toDateString();
-  };
-
-  const isSelected = (date: Date) => {
-    if (!selectedDate) return false;
-    return date.toDateString() === selectedDate.toDateString();
-  };
+  const getDaysInMonth = (year: number, month: number) => new Date(year, month + 1, 0).getDate();
+  const getFirstDayOfMonth = (year: number, month: number) => new Date(year, month, 1).getDay();
+  const isToday = (date: Date) => date.toDateString() === new Date().toDateString();
+  const isSelected = (date: Date) => selectedDate ? date.toDateString() === selectedDate.toDateString() : false;
 
   const handleDateSelect = (day: number) => {
     const newDate = new Date(currentMonth.year, currentMonth.month, day);
@@ -78,16 +65,13 @@ export default function DatePicker({ value, onChange, className = '', placeholde
   const navigateMonth = (direction: 'prev' | 'next') => {
     setCurrentMonth((prev) => {
       if (direction === 'prev') {
-        if (prev.month === 0) {
-          return { year: prev.year - 1, month: 11 };
-        }
-        return { year: prev.year, month: prev.month - 1 };
-      } else {
-        if (prev.month === 11) {
-          return { year: prev.year + 1, month: 0 };
-        }
-        return { year: prev.year, month: prev.month + 1 };
+        return prev.month === 0
+          ? { year: prev.year - 1, month: 11 }
+          : { year: prev.year, month: prev.month - 1 };
       }
+      return prev.month === 11
+        ? { year: prev.year + 1, month: 0 }
+        : { year: prev.year, month: prev.month + 1 };
     });
   };
 
@@ -104,13 +88,14 @@ export default function DatePicker({ value, onChange, className = '', placeholde
 
   return (
     <div ref={pickerRef} className={`relative ${className}`}>
+      {/* Trigger — matches Input component styling */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400 focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100 focus:border-transparent transition-all flex items-center gap-2"
+        className="w-full h-11 px-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white focus:border-transparent transition-all flex items-center gap-2.5"
       >
-        <Calendar className="w-4 h-4 text-gray-400 dark:text-gray-500" />
-        <span className={selectedDate ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500'}>
+        <Calendar className="w-4 h-4 text-gray-400 dark:text-gray-500 flex-shrink-0" strokeWidth={1.8} />
+        <span className={selectedDate ? 'text-gray-900 dark:text-white' : 'text-gray-300 dark:text-gray-600'}>
           {displayValue}
         </span>
       </button>
@@ -118,62 +103,59 @@ export default function DatePicker({ value, onChange, className = '', placeholde
       <AnimatePresence>
         {isOpen && (
           <>
+            {/* Backdrop — mobile fullscreen */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[100] md:hidden"
+              className="fixed inset-0 bg-black/30 backdrop-blur-sm z-[100] md:hidden"
               onClick={() => setIsOpen(false)}
             />
+            {/* Calendar panel */}
             <motion.div
               initial={{ opacity: 0, y: 100 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 100 }}
-              transition={{ duration: 0.3, ease: 'easeOut' }}
-              className="fixed md:absolute z-[101] mt-0 md:mt-2 bg-white dark:bg-gray-900 rounded-t-2xl md:rounded-xl shadow-2xl border-t md:border border-gray-200 dark:border-gray-800 p-4 md:p-4 w-full md:w-[280px] bottom-0 md:bottom-auto left-0 md:left-auto md:right-0 max-h-[85vh] md:max-h-none overflow-y-auto safe-area-inset-bottom"
-              style={{ 
-                paddingBottom: 'max(1rem, env(safe-area-inset-bottom))'
-              }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              className="fixed md:absolute z-[101] bg-white dark:bg-gray-950 rounded-t-2xl md:rounded-xl shadow-2xl border-t md:border border-gray-200 dark:border-gray-800 p-5 md:p-4 w-full md:w-[300px] bottom-0 md:bottom-auto left-0 md:left-auto md:right-0 md:mt-2 max-h-[85vh] md:max-h-none overflow-y-auto"
+              style={{ paddingBottom: 'max(1.25rem, env(safe-area-inset-bottom))' }}
             >
+              {/* Month nav */}
               <div className="flex items-center justify-between mb-4">
                 <button
                   type="button"
                   onClick={() => navigateMonth('prev')}
-                  className="p-2 md:p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-700 transition-colors touch-manipulation"
+                  className="w-8 h-8 md:w-7 md:h-7 rounded-lg flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-700 transition-colors touch-manipulation"
                   aria-label="Mês anterior"
                 >
-                  <ChevronLeft className="w-5 h-5 md:w-4 md:h-4 text-gray-700 dark:text-gray-300" />
+                  <ChevronLeft className="w-4 h-4 text-gray-600 dark:text-gray-400" strokeWidth={2} />
                 </button>
-                <h3 className="font-semibold text-gray-900 dark:text-white text-base md:text-sm">
+                <span className="text-sm font-semibold text-gray-900 dark:text-white">
                   {months[currentMonth.month]} {currentMonth.year}
-                </h3>
+                </span>
                 <button
                   type="button"
                   onClick={() => navigateMonth('next')}
-                  className="p-2 md:p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-700 transition-colors touch-manipulation"
+                  className="w-8 h-8 md:w-7 md:h-7 rounded-lg flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-700 transition-colors touch-manipulation"
                   aria-label="Próximo mês"
                 >
-                  <ChevronRight className="w-5 h-5 md:w-4 md:h-4 text-gray-700 dark:text-gray-300" />
+                  <ChevronRight className="w-4 h-4 text-gray-600 dark:text-gray-400" strokeWidth={2} />
                 </button>
               </div>
 
-              <div className="grid grid-cols-7 gap-1 md:gap-1 mb-2">
+              {/* Weekday headers */}
+              <div className="grid grid-cols-7 gap-0.5 mb-1">
                 {weekDays.map((day) => (
-                  <div
-                    key={day}
-                    className="text-xs md:text-xs font-medium text-gray-500 dark:text-gray-400 text-center py-2 md:py-1"
-                  >
+                  <div key={day} className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 text-center py-1.5 uppercase tracking-wider">
                     {day}
                   </div>
                 ))}
               </div>
 
-              <div className="grid grid-cols-7 gap-1.5 md:gap-1">
+              {/* Day grid */}
+              <div className="grid grid-cols-7 gap-0.5">
                 {days.map((day, index) => {
-                  if (day === null) {
-                    return <div key={`empty-${index}`} className="aspect-square" />;
-                  }
-
+                  if (day === null) return <div key={`empty-${index}`} className="aspect-square" />;
                   const date = new Date(currentMonth.year, currentMonth.month, day);
                   const today = isToday(date);
                   const selected = isSelected(date);
@@ -183,12 +165,12 @@ export default function DatePicker({ value, onChange, className = '', placeholde
                       key={day}
                       type="button"
                       onClick={() => handleDateSelect(day)}
-                      className={`aspect-square rounded-lg text-sm md:text-sm font-medium transition-all touch-manipulation min-h-[44px] md:min-h-0 ${
+                      className={`aspect-square rounded-lg text-sm font-medium transition-all touch-manipulation min-h-[44px] md:min-h-0 flex items-center justify-center ${
                         selected
-                          ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900'
+                          ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-semibold'
                           : today
-                          ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white font-semibold'
-                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-700'
+                          ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white font-semibold ring-1 ring-gray-300 dark:ring-gray-600'
+                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-900 active:bg-gray-100 dark:active:bg-gray-800'
                       }`}
                     >
                       {day}
@@ -197,10 +179,11 @@ export default function DatePicker({ value, onChange, className = '', placeholde
                 })}
               </div>
 
+              {/* Today shortcut */}
               <button
                 type="button"
                 onClick={goToToday}
-                className="w-full mt-4 md:mt-3 px-4 md:px-3 py-3 md:py-2 text-sm md:text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-700 rounded-lg transition-colors touch-manipulation"
+                className="w-full mt-3 py-2.5 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-900 active:bg-gray-100 dark:active:bg-gray-800 rounded-xl transition-colors touch-manipulation border border-gray-200 dark:border-gray-800"
               >
                 Hoje
               </button>
