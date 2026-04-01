@@ -251,12 +251,10 @@ export default function TransactionsPage() {
 
   return (
     <PageTransition>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-semibold text-gray-900 dark:text-white">
-            Transações
-          </h1>
-        </div>
+      <div className="space-y-5">
+        <h1 className="text-2xl font-semibold text-gray-900 dark:text-white tracking-tight">
+          Transações
+        </h1>
 
         <Dialog open={showForm} onOpenChange={setShowForm}>
           <DialogContent>
@@ -265,13 +263,13 @@ export default function TransactionsPage() {
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4 mt-4">
               {error && (
-                <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg p-3 text-sm text-red-700 dark:text-red-300">
+                <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-xl p-3 text-sm text-red-700 dark:text-red-300">
                   {error}
                 </div>
               )}
-              
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">
                   Descrição
                 </label>
                 <Input
@@ -285,9 +283,9 @@ export default function TransactionsPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">
                     Valor
                   </label>
                   <Input
@@ -305,7 +303,7 @@ export default function TransactionsPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">
                     Data
                   </label>
                   <DatePicker
@@ -319,7 +317,7 @@ export default function TransactionsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">
                   Tipo
                 </label>
                 <Select
@@ -368,9 +366,10 @@ export default function TransactionsPage() {
           </DialogContent>
         </Dialog>
 
+        {/* Filters — clean labels */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-3">
           <div className="flex-1 min-w-0">
-            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+            <label className="block text-[11px] font-medium text-gray-400 mb-1.5 uppercase tracking-wider">
               Mês
             </label>
             <MonthPicker
@@ -382,9 +381,9 @@ export default function TransactionsPage() {
               className="w-full"
             />
           </div>
-          
+
           <div className="flex-1 min-w-0">
-            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+            <label className="block text-[11px] font-medium text-gray-400 mb-1.5 uppercase tracking-wider">
               Data Específica
             </label>
             <DatePicker
@@ -402,66 +401,70 @@ export default function TransactionsPage() {
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden">
+        {/* Transaction list */}
+        <div className="bg-white dark:bg-gray-950 rounded-2xl border border-gray-100 dark:border-gray-900 overflow-hidden">
           {isLoading ? (
             <div className="flex items-center justify-center py-16">
               <Loading text="Carregando..." size="lg" />
             </div>
           ) : transactions && transactions.length > 0 ? (
-            <div className="divide-y divide-gray-200 dark:divide-gray-800">
+            <div className="divide-y divide-gray-50 dark:divide-gray-900">
               {groupedTransactions.map((group) => (
                 <motion.div
                   key={group.monthKey}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                 >
-                  <div className="bg-gray-50 dark:bg-gray-900/50 px-6 py-3 border-b border-gray-200 dark:border-gray-800">
-                    <h3 className="font-semibold text-gray-900 dark:text-white">
+                  <div className="px-4 py-2.5 border-b border-gray-100 dark:border-gray-900">
+                    <h3 className="text-xs font-medium text-gray-400 uppercase tracking-wider">
                       {group.monthLabel}
                     </h3>
                   </div>
-                  <div className="divide-y divide-gray-200 dark:divide-gray-800">
+                  <div className="divide-y divide-gray-50 dark:divide-gray-900">
                     {group.transactions.map((transaction) => {
                       const isPreviewTransaction = isPreview(transaction.id);
                       const previewId = isPreviewTransaction && typeof transaction.id === 'string' ? transaction.id : null;
                       const remaining = isPreviewTransaction && previewId ? timeRemaining[previewId] : null;
-                      
+
                       return (
                         <motion.div
                           key={transaction.id}
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
-                          className={`p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors ${
-                            isPreviewTransaction ? 'bg-yellow-50/50 dark:bg-yellow-950/10 border-l-2 border-yellow-400 dark:border-yellow-600' : ''
+                          className={`px-4 py-3.5 hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors ${
+                            isPreviewTransaction ? 'bg-amber-50/50 dark:bg-amber-950/10 border-l-2 border-amber-400 dark:border-amber-600' : ''
                           }`}
                         >
-                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                            <div className="flex items-start gap-3 flex-1 min-w-0">
-                              <div className={`mt-1 w-2 h-2 rounded-full flex-shrink-0 ${
-                                transaction.type === "income" ? "bg-green-500" : "bg-red-500"
-                              }`} />
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                              {/* Type indicator dot */}
+                              <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                                transaction.type === "income"
+                                  ? "bg-emerald-50 dark:bg-emerald-950/30"
+                                  : "bg-red-50 dark:bg-red-950/30"
+                              }`}>
+                                <div className={`w-2 h-2 rounded-full ${
+                                  transaction.type === "income" ? "bg-emerald-500" : "bg-red-500"
+                                }`} />
+                              </div>
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2">
-                                  <h4 className="font-medium text-gray-900 dark:text-white truncate">
+                                  <h4 className="text-sm font-medium text-gray-900 dark:text-white truncate">
                                     {transaction.description}
                                   </h4>
                                   {isPreviewTransaction && (
-                                    <span className="px-2 py-0.5 text-xs font-medium bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 rounded-full">
+                                    <span className="px-1.5 py-0.5 text-[10px] font-medium bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 rounded-md">
                                       Preview
                                     </span>
                                   )}
                                 </div>
-                                <div className="flex flex-wrap items-center gap-1.5 md:gap-2 mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                  <span className="whitespace-nowrap">{formatDateShort(transaction.transaction_date)}</span>
-                                  <span className="hidden sm:inline">•</span>
-                                  <span className={`whitespace-nowrap ${transaction.type === "income" ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
-                                    {transaction.type === "income" ? "Receita" : "Despesa"}
-                                  </span>
+                                <div className="flex items-center gap-1.5 mt-0.5 text-[11px] text-gray-400">
+                                  <span>{formatDateShort(transaction.transaction_date)}</span>
                                   {isPreviewTransaction && remaining !== null && remaining > 0 && (
                                     <>
-                                      <span className="hidden sm:inline">•</span>
-                                      <PreviewCountdown 
-                                        secondsRemaining={remaining} 
+                                      <span>•</span>
+                                      <PreviewCountdown
+                                        secondsRemaining={remaining}
                                         isExpiring={remaining <= 30}
                                       />
                                     </>
@@ -469,25 +472,25 @@ export default function TransactionsPage() {
                                 </div>
                               </div>
                             </div>
-                            <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4">
-                              <div className={`text-lg font-semibold ${
+                            <div className="flex items-center gap-2">
+                              <div className={`text-sm font-semibold tabular-nums ${
                                 transaction.type === "income"
-                                  ? "text-green-600 dark:text-green-400"
+                                  ? "text-emerald-600 dark:text-emerald-400"
                                   : "text-red-600 dark:text-red-400"
                               }`}>
                                 {transaction.type === "income" ? "+" : "-"}
                                 <CurrencyDisplay value={transaction.amount} />
                               </div>
-                              <div className="flex items-center gap-1">
+                              <div className="flex items-center">
                                 {isPreviewTransaction && previewId ? (
                                   <Button
                                     variant="default"
                                     size="sm"
                                     onClick={() => handleSavePreview(previewId)}
-                                    className="flex items-center gap-1.5"
-                                    title="Salvar transação"
+                                    className="flex items-center gap-1 h-7 text-xs"
+                                    title="Salvar"
                                   >
-                                    <Save className="h-3.5 w-3.5" />
+                                    <Save className="h-3 w-3" />
                                     Salvar
                                   </Button>
                                 ) : (
@@ -497,16 +500,18 @@ export default function TransactionsPage() {
                                       size="icon"
                                       onClick={() => openEdit(transaction)}
                                       title="Editar"
+                                      className="h-8 w-8"
                                     >
-                                      <Pencil className="h-4 w-4" />
+                                      <Pencil className="h-3.5 w-3.5" />
                                     </Button>
                                     <Button
                                       variant="ghost"
                                       size="icon"
                                       onClick={() => handleDelete(transaction.id)}
                                       title="Excluir"
+                                      className="h-8 w-8"
                                     >
-                                      <Trash2 className="h-4 w-4" />
+                                      <Trash2 className="h-3.5 w-3.5" />
                                     </Button>
                                   </>
                                 )}
@@ -522,13 +527,13 @@ export default function TransactionsPage() {
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-16 px-4">
-              <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
-                <Filter className="h-8 w-8 text-gray-400" />
+              <div className="w-12 h-12 bg-gray-100 dark:bg-gray-900 rounded-2xl flex items-center justify-center mb-3">
+                <Filter className="h-5 w-5 text-gray-400" />
               </div>
-              <p className="text-gray-600 dark:text-gray-400 font-medium">
+              <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
                 Nenhuma transação encontrada
               </p>
-              <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
                 Crie uma nova transação para começar
               </p>
             </div>

@@ -25,11 +25,20 @@ export default function Calendar({ year, month, dailyBalances }: CalendarProps) 
     }
   };
 
+  const statusColor = (status: string) => {
+    switch (status) {
+      case 'green': return 'bg-emerald-500';
+      case 'red': return 'bg-red-500';
+      case 'yellow': return 'bg-amber-500';
+      default: return 'bg-gray-300 dark:bg-gray-600';
+    }
+  };
+
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-6">
-      <div className="grid grid-cols-7 gap-2">
+    <div className="bg-white dark:bg-gray-950 rounded-2xl border border-gray-100 dark:border-gray-900 p-5">
+      <div className="grid grid-cols-7 gap-1.5">
         {weekDays.map((day) => (
-          <div key={day} className="text-center font-medium text-gray-500 dark:text-gray-400 text-xs uppercase py-2">
+          <div key={day} className="text-center font-medium text-gray-400 dark:text-gray-500 text-[11px] uppercase tracking-wider py-2">
             {day}
           </div>
         ))}
@@ -45,32 +54,25 @@ export default function Calendar({ year, month, dailyBalances }: CalendarProps) 
               key={index}
               onClick={() => handleDayClick(date, balance)}
               disabled={!hasBalance}
-              className={`min-h-[80px] p-3 rounded-lg border transition-all ${
+              className={`min-h-[76px] p-2.5 rounded-xl transition-all text-left ${
                 isCurrentMonth
                   ? hasBalance
-                    ? 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-gray-300 dark:hover:border-gray-600 cursor-pointer'
-                    : 'border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900'
-                  : 'border-transparent bg-gray-50 dark:bg-gray-800/30 opacity-40'
-              } ${isTodayDate ? 'ring-2 ring-gray-900 dark:ring-gray-100' : ''}`}
+                    ? 'bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer'
+                    : 'bg-transparent'
+                  : 'opacity-25'
+              } ${isTodayDate ? 'ring-2 ring-gray-900 dark:ring-gray-200 ring-offset-1 dark:ring-offset-gray-950' : ''}`}
             >
               <div className="flex flex-col h-full">
-                <div className={`text-sm font-medium mb-2 ${
-                  isTodayDate ? 'text-gray-900 dark:text-white font-semibold' : isCurrentMonth ? 'text-gray-700 dark:text-gray-300' : 'text-gray-400 dark:text-gray-600'
+                <div className={`text-xs mb-1.5 ${
+                  isTodayDate ? 'text-gray-900 dark:text-white font-bold' : isCurrentMonth ? 'text-gray-500 dark:text-gray-400 font-medium' : 'text-gray-300 dark:text-gray-700'
                 }`}>
                   {date.getDate()}
                 </div>
 
                 {balance && isCurrentMonth && (
                   <>
-                    <div 
-                      className={`w-full h-1 rounded-full mb-2 flex-shrink-0 ${
-                        balance.status === 'green' ? 'bg-green-500 dark:bg-green-400' 
-                          : balance.status === 'red' ? 'bg-red-500 dark:bg-red-400' 
-                          : balance.status === 'yellow' ? 'bg-yellow-500 dark:bg-yellow-400' 
-                          : 'bg-gray-300 dark:bg-gray-600'
-                      }`}
-                    ></div>
-                    <div className="text-xs font-medium text-gray-900 dark:text-white truncate mt-auto" title={formatCurrency(balance.balance)}>
+                    <div className={`w-full h-0.5 rounded-full mb-1.5 ${statusColor(balance.status)}`} />
+                    <div className="text-[11px] font-semibold text-gray-900 dark:text-white truncate mt-auto leading-tight" title={formatCurrency(balance.balance)}>
                       {formatCurrency(balance.balance)}
                     </div>
                   </>
@@ -81,18 +83,19 @@ export default function Calendar({ year, month, dailyBalances }: CalendarProps) 
         })}
       </div>
 
-      <div className="mt-6 flex items-center justify-center gap-6 text-xs">
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-1 rounded-full bg-red-500 dark:bg-red-400"></div>
-          <span className="text-gray-600 dark:text-gray-400">{t('status.bad')}</span>
+      {/* Legend — minimal */}
+      <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-900 flex items-center justify-center gap-5 text-[11px]">
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 h-0.5 rounded-full bg-red-500" />
+          <span className="text-gray-400">{t('status.bad')}</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-1 rounded-full bg-yellow-500 dark:bg-yellow-400"></div>
-          <span className="text-gray-600 dark:text-gray-400">{t('status.regular')}</span>
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 h-0.5 rounded-full bg-amber-500" />
+          <span className="text-gray-400">{t('status.regular')}</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-1 rounded-full bg-green-500 dark:bg-green-400"></div>
-          <span className="text-gray-600 dark:text-gray-400">{t('status.good')}</span>
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 h-0.5 rounded-full bg-emerald-500" />
+          <span className="text-gray-400">{t('status.good')}</span>
         </div>
       </div>
     </div>

@@ -159,7 +159,7 @@ function DashboardLayoutClient({ children }: DashboardLayoutProps) {
         </aside>
 
         <main className="flex-1 min-h-screen bg-gray-50 dark:bg-black pb-20 md:pb-0">
-          <div className="max-w-5xl mx-auto px-4 py-4 md:px-8 md:py-6">
+          <div className="max-w-5xl mx-auto px-5 py-4 md:px-8 md:py-6">
             {children}
           </div>
         </main>

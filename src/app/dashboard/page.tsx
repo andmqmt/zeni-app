@@ -114,7 +114,7 @@ export default function DashboardPage() {
   return (
     <PageTransition>
       <div className="space-y-5">
-        {/* Header — greeting + month nav */}
+        {/* Header */}
         <div>
           <h1 className="text-2xl font-semibold text-gray-900 dark:text-white tracking-tight">
             {profile?.first_name ? `${getGreeting()}, ${profile.first_name}` : 'Dashboard'}
@@ -145,43 +145,74 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Summary cards — clean, borderless, with subtle background */}
-        <div className="grid grid-cols-3 gap-3">
-          {/* Balance */}
-          <div className="bg-white dark:bg-gray-950 rounded-2xl p-4 border border-gray-100 dark:border-gray-900">
+        {/* Summary — mobile: stacked hero card + row; desktop: 3 columns */}
+        {/* Mobile: Hero balance card */}
+        <div className="md:hidden space-y-3">
+          <div className="bg-gray-900 dark:bg-gray-100 rounded-2xl p-5">
+            <div className="flex items-center gap-1.5 mb-1">
+              <Wallet className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500" />
+              <span className="text-[11px] font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider">Saldo do mês</span>
+            </div>
+            <div className={`text-3xl font-semibold tracking-tight ${
+              endOfMonthBalance >= 0 ? 'text-white dark:text-gray-900' : 'text-red-400 dark:text-red-600'
+            }`}>
+              <CurrencyDisplay value={endOfMonthBalance} />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-white dark:bg-gray-950 rounded-2xl p-4 border border-gray-100 dark:border-gray-900">
+              <div className="flex items-center gap-1.5 mb-1.5">
+                <TrendingUp className="w-3 h-3 text-green-500" />
+                <span className="text-[10px] font-medium text-gray-400 uppercase tracking-wider">Entradas</span>
+              </div>
+              <div className="text-lg font-semibold text-gray-900 dark:text-white tracking-tight">
+                <CurrencyDisplay value={totalIncome} />
+              </div>
+            </div>
+            <div className="bg-white dark:bg-gray-950 rounded-2xl p-4 border border-gray-100 dark:border-gray-900">
+              <div className="flex items-center gap-1.5 mb-1.5">
+                <TrendingDown className="w-3 h-3 text-red-500" />
+                <span className="text-[10px] font-medium text-gray-400 uppercase tracking-wider">Saídas</span>
+              </div>
+              <div className="text-lg font-semibold text-gray-900 dark:text-white tracking-tight">
+                <CurrencyDisplay value={totalExpense} />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Desktop: 3 equal columns */}
+        <div className="hidden md:grid md:grid-cols-3 gap-3">
+          <div className="bg-white dark:bg-gray-950 rounded-2xl p-5 border border-gray-100 dark:border-gray-900">
             <div className="flex items-center gap-1.5 mb-2">
               <Wallet className="w-3.5 h-3.5 text-gray-400" />
               <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Saldo</span>
             </div>
-            <div className={`text-xl md:text-2xl font-semibold tracking-tight ${endOfMonthBalance >= 0 ? 'text-gray-900 dark:text-white' : 'text-red-600 dark:text-red-400'}`}>
+            <div className={`text-2xl font-semibold tracking-tight ${endOfMonthBalance >= 0 ? 'text-gray-900 dark:text-white' : 'text-red-600 dark:text-red-400'}`}>
               <CurrencyDisplay value={endOfMonthBalance} />
             </div>
           </div>
-
-          {/* Income */}
-          <div className="bg-white dark:bg-gray-950 rounded-2xl p-4 border border-gray-100 dark:border-gray-900">
+          <div className="bg-white dark:bg-gray-950 rounded-2xl p-5 border border-gray-100 dark:border-gray-900">
             <div className="flex items-center gap-1.5 mb-2">
               <TrendingUp className="w-3.5 h-3.5 text-green-500" />
               <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Entradas</span>
             </div>
-            <div className="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white tracking-tight">
+            <div className="text-2xl font-semibold text-gray-900 dark:text-white tracking-tight">
               <CurrencyDisplay value={totalIncome} />
             </div>
           </div>
-
-          {/* Expenses */}
-          <div className="bg-white dark:bg-gray-950 rounded-2xl p-4 border border-gray-100 dark:border-gray-900">
+          <div className="bg-white dark:bg-gray-950 rounded-2xl p-5 border border-gray-100 dark:border-gray-900">
             <div className="flex items-center gap-1.5 mb-2">
               <TrendingDown className="w-3.5 h-3.5 text-red-500" />
               <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Saídas</span>
             </div>
-            <div className="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white tracking-tight">
+            <div className="text-2xl font-semibold text-gray-900 dark:text-white tracking-tight">
               <CurrencyDisplay value={totalExpense} />
             </div>
           </div>
         </div>
 
-        {/* Daily balance — Calendar (desktop) / DayList (mobile) */}
+        {/* Daily balance */}
         {balanceLoading ? (
           <div className="bg-white dark:bg-gray-950 rounded-2xl p-8 border border-gray-100 dark:border-gray-900">
             <div className="text-center text-gray-400">{t('common.loading')}</div>

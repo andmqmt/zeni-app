@@ -6,7 +6,7 @@ import { useProfile, useUpdateProfile, useInitPreferences, useUpdatePreferences 
 import { handleApiError } from '@/lib/utils/error';
 import { useToast } from '@/contexts/ToastContext';
 import { UserPreferences } from '@/types';
-import { User, Phone, Mail, Globe, Moon, Sun, Shield } from 'lucide-react';
+import { User, Phone, Mail, Globe, Moon, Sun, Shield, ChevronRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import Loading from '@/components/Loading';
@@ -114,31 +114,36 @@ export default function ProfilePage() {
 
   return (
     <PageTransition>
-      <div className="space-y-6">
-        <h1 className="text-3xl font-semibold text-gray-900 dark:text-white">
-          Perfil
+      <div className="space-y-5">
+        <h1 className="text-2xl font-semibold text-gray-900 dark:text-white tracking-tight">
+          Configurações
         </h1>
 
         {error && (
-          <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg p-3 text-sm text-red-700 dark:text-red-300">
+          <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-xl p-3 text-sm text-red-700 dark:text-red-300">
             {error}
           </div>
         )}
 
+        {/* Personal Info */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-6"
+          className="bg-white dark:bg-gray-950 rounded-2xl border border-gray-100 dark:border-gray-900"
         >
-          <div className="flex items-center gap-3 mb-6">
-            <User className="h-5 w-5 text-gray-600 dark:text-gray-400" />
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Informações Pessoais</h2>
+          <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-900">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                <User className="h-4 w-4 text-gray-500" />
+              </div>
+              <h2 className="text-sm font-semibold text-gray-900 dark:text-white">Informações Pessoais</h2>
+            </div>
           </div>
-          
-          <form onSubmit={handleProfileSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+          <form onSubmit={handleProfileSubmit} className="p-5 space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-[11px] font-medium text-gray-400 mb-1.5 uppercase tracking-wider">
                   Nome
                 </label>
                 <Input
@@ -150,7 +155,7 @@ export default function ProfilePage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-[11px] font-medium text-gray-400 mb-1.5 uppercase tracking-wider">
                   Sobrenome
                 </label>
                 <Input
@@ -164,8 +169,8 @@ export default function ProfilePage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-                <Mail className="h-4 w-4" />
+              <label className="block text-[11px] font-medium text-gray-400 mb-1.5 uppercase tracking-wider flex items-center gap-1.5">
+                <Mail className="h-3 w-3" />
                 Email
               </label>
               <div className="relative">
@@ -173,18 +178,15 @@ export default function ProfilePage() {
                   type="email"
                   disabled
                   value={profile?.email || ''}
-                  className="cursor-not-allowed opacity-60"
+                  className="cursor-not-allowed opacity-50"
                 />
-                <Shield className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Shield className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-300" />
               </div>
-              <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                Email não pode ser alterado
-              </p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-                <Phone className="h-4 w-4" />
+              <label className="block text-[11px] font-medium text-gray-400 mb-1.5 uppercase tracking-wider flex items-center gap-1.5">
+                <Phone className="h-3 w-3" />
                 Telefone
               </label>
               <Input
@@ -196,87 +198,80 @@ export default function ProfilePage() {
               />
             </div>
 
-            <div className="flex justify-end pt-2">
+            <div className="flex justify-end pt-1">
               <Button
                 type="submit"
                 disabled={updateProfileMutation.isPending}
               >
-                {updateProfileMutation.isPending ? 'Salvando...' : 'Salvar Perfil'}
+                {updateProfileMutation.isPending ? 'Salvando...' : 'Salvar'}
               </Button>
             </div>
           </form>
         </motion.div>
 
+        {/* Balance Thresholds */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-6"
+          transition={{ delay: 0.05 }}
+          className="bg-white dark:bg-gray-950 rounded-2xl border border-gray-100 dark:border-gray-900"
         >
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-            Preferências de Saldo
-          </h2>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-            Defina os limites para classificação do seu saldo diário
-          </p>
-          
-          <form onSubmit={handlePreferencesSubmit} className="space-y-6">
-            <div className="bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-              <p className="text-sm text-gray-700 dark:text-gray-300">
-                💡 Os limites devem estar em ordem crescente
-              </p>
-            </div>
+          <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-900">
+            <h2 className="text-sm font-semibold text-gray-900 dark:text-white">Preferências de Saldo</h2>
+            <p className="text-xs text-gray-400 mt-0.5">Limites para classificação do saldo diário</p>
+          </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Limite Ruim
+          <form onSubmit={handlePreferencesSubmit} className="p-5 space-y-4">
+            <div className="grid grid-cols-3 gap-3">
+              {/* Bad */}
+              <div className="text-center">
+                <label className="block text-[11px] font-medium text-red-400 mb-1.5 uppercase tracking-wider">
+                  Ruim
                 </label>
                 <Input
                   type="number"
                   step="0.01"
                   required
-                  placeholder="0,00"
+                  placeholder="0"
                   value={preferencesData.bad_threshold}
                   onChange={(e) => setPreferencesData({ ...preferencesData, bad_threshold: e.target.value === '' ? 0 : parseFloat(e.target.value) })}
+                  className="text-center"
                 />
-                <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                  Abaixo deste valor = Ruim
-                </p>
+                <div className="mt-1.5 w-full h-0.5 rounded-full bg-red-500" />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Limite Regular
+              {/* OK */}
+              <div className="text-center">
+                <label className="block text-[11px] font-medium text-amber-400 mb-1.5 uppercase tracking-wider">
+                  Regular
                 </label>
                 <Input
                   type="number"
                   step="0.01"
                   required
-                  placeholder="500,00"
+                  placeholder="500"
                   value={preferencesData.ok_threshold}
                   onChange={(e) => setPreferencesData({ ...preferencesData, ok_threshold: e.target.value === '' ? 0 : parseFloat(e.target.value) })}
+                  className="text-center"
                 />
-                <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                  Entre limites = Regular
-                </p>
+                <div className="mt-1.5 w-full h-0.5 rounded-full bg-amber-500" />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Limite Bom
+              {/* Good */}
+              <div className="text-center">
+                <label className="block text-[11px] font-medium text-emerald-400 mb-1.5 uppercase tracking-wider">
+                  Bom
                 </label>
                 <Input
                   type="number"
                   step="0.01"
                   required
-                  placeholder="1500,00"
+                  placeholder="1500"
                   value={preferencesData.good_threshold}
                   onChange={(e) => setPreferencesData({ ...preferencesData, good_threshold: e.target.value === '' ? 0 : parseFloat(e.target.value) })}
+                  className="text-center"
                 />
-                <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                  Acima deste valor = Bom
-                </p>
+                <div className="mt-1.5 w-full h-0.5 rounded-full bg-emerald-500" />
               </div>
             </div>
 
@@ -287,71 +282,72 @@ export default function ProfilePage() {
               >
                 {(initPreferencesMutation.isPending || updatePreferencesMutation.isPending)
                   ? 'Salvando...'
-                  : 'Salvar Preferências'}
+                  : 'Salvar'}
               </Button>
             </div>
           </form>
         </motion.div>
 
+        {/* App Settings */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-6"
+          transition={{ delay: 0.1 }}
+          className="bg-white dark:bg-gray-950 rounded-2xl border border-gray-100 dark:border-gray-900 overflow-hidden"
         >
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">
-            Configurações
-          </h2>
-          
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
-                <Globe className="h-4 w-4" />
-                Idioma
-              </label>
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={() => setLanguage('pt-BR')}
-                  className={`px-4 py-3 rounded-lg border-2 transition-colors font-medium ${
-                    language === 'pt-BR'
-                      ? 'border-gray-900 dark:border-gray-100 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900'
-                      : 'border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-gray-400 dark:hover:border-gray-600'
-                  }`}
-                >
-                  🇧🇷 Português
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setLanguage('en-US')}
-                  className={`px-4 py-3 rounded-lg border-2 transition-colors font-medium ${
-                    language === 'en-US'
-                      ? 'border-gray-900 dark:border-gray-100 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900'
-                      : 'border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-gray-400 dark:hover:border-gray-600'
-                  }`}
-                >
-                  🇺🇸 English
-                </button>
-              </div>
-            </div>
+          <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-900">
+            <h2 className="text-sm font-semibold text-gray-900 dark:text-white">Aparência</h2>
+          </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
-                {theme === 'dark' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
-                Tema
-              </label>
+          {/* Language toggle */}
+          <div className="px-5 py-4 border-b border-gray-50 dark:border-gray-900">
+            <label className="block text-[11px] font-medium text-gray-400 mb-2.5 uppercase tracking-wider flex items-center gap-1.5">
+              <Globe className="h-3 w-3" />
+              Idioma
+            </label>
+            <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
-                onClick={toggleTheme}
-                className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-600 transition-colors flex items-center justify-between font-medium text-gray-700 dark:text-gray-300"
+                onClick={() => setLanguage('pt-BR')}
+                className={`px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                  language === 'pt-BR'
+                    ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900'
+                    : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+                }`}
               >
-                <span>{theme === 'dark' ? '🌙 Modo Escuro' : '☀️ Modo Claro'}</span>
-                <span className="text-xs px-2 py-1 rounded bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400">
-                  Alternar
-                </span>
+                🇧🇷 Português
+              </button>
+              <button
+                type="button"
+                onClick={() => setLanguage('en-US')}
+                className={`px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                  language === 'en-US'
+                    ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900'
+                    : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+                }`}
+              >
+                🇺🇸 English
               </button>
             </div>
           </div>
+
+          {/* Theme toggle — native iOS-style row */}
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="w-full px-5 py-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                {theme === 'dark' ? <Moon className="h-4 w-4 text-gray-500" /> : <Sun className="h-4 w-4 text-gray-500" />}
+              </div>
+              <div className="text-left">
+                <div className="text-sm font-medium text-gray-900 dark:text-white">Tema</div>
+                <div className="text-[11px] text-gray-400">{theme === 'dark' ? 'Modo Escuro' : 'Modo Claro'}</div>
+              </div>
+            </div>
+            <ChevronRight className="h-4 w-4 text-gray-300 dark:text-gray-600" />
+          </button>
         </motion.div>
       </div>
     </PageTransition>
