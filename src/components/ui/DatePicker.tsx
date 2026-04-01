@@ -117,8 +117,8 @@ export default function DatePicker({ value, onChange, className = '', placeholde
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 100 }}
               transition={{ duration: 0.25, ease: 'easeOut' }}
-              className="fixed md:absolute z-[101] bg-white dark:bg-gray-950 rounded-t-2xl md:rounded-xl shadow-2xl border-t md:border border-gray-200 dark:border-gray-800 p-5 md:p-4 w-full md:w-[300px] bottom-0 md:bottom-auto left-0 md:left-auto md:right-0 md:mt-2 max-h-[85vh] md:max-h-none overflow-y-auto"
-              style={{ paddingBottom: 'max(1.25rem, env(safe-area-inset-bottom))' }}
+              className="fixed md:absolute z-[101] flex flex-col bg-white dark:bg-gray-950 rounded-t-2xl md:rounded-xl shadow-2xl border-t md:border border-gray-200 dark:border-gray-800 p-5 md:p-4 w-full md:w-[300px] bottom-0 md:bottom-auto left-0 md:left-auto md:right-0 md:mt-2 max-h-[85dvh] md:max-h-none overflow-y-auto pb-10 md:pb-4"
+              style={{ paddingBottom: 'max(2.5rem, env(safe-area-inset-bottom))' }}
             >
               {/* Month nav */}
               <div className="flex items-center justify-between mb-4">
