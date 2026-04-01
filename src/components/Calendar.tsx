@@ -71,7 +71,7 @@ export default function Calendar({ year, month, dailyBalances }: CalendarProps) 
 
                 {balance && isCurrentMonth && (
                   <>
-                    <div className={`w-full h-0.5 rounded-full mb-1.5 ${statusColor(balance.status)}`} />
+                    <div className={`w-full h-0.5 rounded-full mb-1.5 ${statusColor(balance.status || '')}`} />
                     <div className="text-[11px] font-semibold text-gray-900 dark:text-white truncate mt-auto leading-tight" title={formatCurrency(balance.balance)}>
                       {formatCurrency(balance.balance)}
                     </div>

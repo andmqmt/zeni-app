@@ -103,7 +103,7 @@ export default function DayList({ year, month, dailyBalances }: DayListProps) {
                 <div>
                   {balance ? (
                     <div className="flex items-center gap-1.5">
-                      <div className={`w-1.5 h-1.5 rounded-full ${statusDot(balance.status)}`} />
+                      <div className={`w-1.5 h-1.5 rounded-full ${statusDot(balance.status || '')}`} />
                       <span className="text-xs text-gray-500 dark:text-gray-400">
                         {balance.status === 'green' ? t('status.good') :
                          balance.status === 'yellow' ? t('status.regular') :
