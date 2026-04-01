@@ -171,7 +171,7 @@ export default function FloatingTransactionButton() {
                           : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                       }`}
                     >
-                      <ArrowUpRight className="w-4 h-4" />
+                      <ArrowUpRight className="w-4 h-4" strokeWidth={2.5} />
                       Despesa
                     </button>
                     <button
@@ -179,11 +179,11 @@ export default function FloatingTransactionButton() {
                       onClick={() => setFormData({ ...formData, type: 'income' })}
                       className={`flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all ${
                         formData.type === 'income'
-                          ? 'bg-white dark:bg-gray-800 text-green-600 dark:text-green-400 shadow-sm'
+                          ? 'bg-white dark:bg-gray-800 text-emerald-600 dark:text-emerald-400 shadow-sm'
                           : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                       }`}
                     >
-                      <ArrowDownLeft className="w-4 h-4" />
+                      <ArrowDownLeft className="w-4 h-4" strokeWidth={2.5} />
                       Receita
                     </button>
                   </div>

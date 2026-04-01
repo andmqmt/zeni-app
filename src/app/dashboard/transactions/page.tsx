@@ -15,8 +15,9 @@ import { useToast } from "@/contexts/ToastContext";
 import {
   Pencil,
   Trash2,
-  Calendar,
-  Filter,
+  ArrowDownLeft,
+  ArrowUpRight,
+  Inbox,
 } from "lucide-react";
 import { Transaction, TransactionCreate } from "@/types";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -31,7 +32,7 @@ import { Input } from "@/components/ui/Input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
 import DatePicker from "@/components/ui/DatePicker";
 import MonthPicker from "@/components/ui/MonthPicker";
-import { Save, Clock } from "lucide-react";
+import { Save } from "lucide-react";
 
 export default function TransactionsPage() {
   const currentDate = new Date();
@@ -437,15 +438,16 @@ export default function TransactionsPage() {
                         >
                           <div className="flex items-center justify-between gap-3">
                             <div className="flex items-center gap-3 flex-1 min-w-0">
-                              {/* Type indicator dot */}
+                              {/* Type indicator */}
                               <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 ${
                                 transaction.type === "income"
                                   ? "bg-emerald-50 dark:bg-emerald-950/30"
                                   : "bg-red-50 dark:bg-red-950/30"
                               }`}>
-                                <div className={`w-2 h-2 rounded-full ${
-                                  transaction.type === "income" ? "bg-emerald-500" : "bg-red-500"
-                                }`} />
+                                {transaction.type === "income"
+                                  ? <ArrowDownLeft className="w-3.5 h-3.5 text-emerald-500" strokeWidth={2.5} />
+                                  : <ArrowUpRight className="w-3.5 h-3.5 text-red-500" strokeWidth={2.5} />
+                                }
                               </div>
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2">
@@ -528,7 +530,7 @@ export default function TransactionsPage() {
           ) : (
             <div className="flex flex-col items-center justify-center py-16 px-4">
               <div className="w-12 h-12 bg-gray-100 dark:bg-gray-900 rounded-2xl flex items-center justify-center mb-3">
-                <Filter className="h-5 w-5 text-gray-400" />
+                <Inbox className="h-5 w-5 text-gray-400" strokeWidth={1.5} />
               </div>
               <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
                 Nenhuma transação encontrada

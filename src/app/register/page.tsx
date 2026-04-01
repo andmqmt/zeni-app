@@ -46,124 +46,100 @@ export default function RegisterPage() {
     }
   };
 
+  const inputClass = "block w-full px-4 py-3 border border-gray-200 dark:border-gray-800 rounded-xl placeholder-gray-300 dark:placeholder-gray-600 text-gray-900 dark:text-white bg-white dark:bg-gray-950 focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white focus:border-transparent transition-all text-sm";
+
   return (
     <div className="min-h-screen flex relative">
       <div className="absolute top-4 right-4 z-50"><ThemeLanguageControls /></div>
-      <div className="hidden lg:flex lg:w-1/2 bg-gray-900 dark:bg-gray-100 relative overflow-hidden">
+
+      {/* Left panel — brand hero */}
+      <div className="hidden lg:flex lg:w-1/2 bg-gray-950 dark:bg-gray-50 relative overflow-hidden">
+        <div className="absolute top-20 left-20 w-64 h-64 rounded-full border border-white/5 dark:border-gray-900/5" />
+        <div className="absolute bottom-32 right-16 w-48 h-48 rounded-full border border-white/5 dark:border-gray-900/5" />
+        <div className="absolute top-1/2 left-1/3 w-96 h-96 rounded-full bg-emerald-500/5 blur-3xl" />
+        
         <div className="relative z-10 flex flex-col justify-center px-16 text-white dark:text-gray-900">
-          <h1 className="text-5xl font-bold mb-8">Zeni</h1>
-          <h2 className="text-4xl font-semibold mb-6">{t('login.hero.title')}<br/><span className="opacity-70">{t('login.hero.subtitle')}</span></h2>
-          <p className="text-lg opacity-80 max-w-md leading-relaxed">{t('login.hero.description')}</p>
+          <div className="flex items-center gap-3 mb-10">
+            <div className="w-12 h-12 bg-white dark:bg-gray-900 rounded-2xl flex items-center justify-center">
+              <span className="text-gray-900 dark:text-white text-xl font-bold">Z</span>
+            </div>
+            <h1 className="text-3xl font-bold tracking-tight">Zeni</h1>
+          </div>
+          <h2 className="text-4xl font-bold leading-tight mb-4">
+            {t('login.hero.title')}<br/>
+            <span className="text-gray-400 dark:text-gray-500">{t('login.hero.subtitle')}</span>
+          </h2>
+          <p className="text-base text-gray-400 dark:text-gray-500 max-w-md leading-relaxed">
+            {t('login.hero.description')}
+          </p>
         </div>
       </div>
-      <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-900">
-        <div className="max-w-md w-full space-y-8">
-          <div className="lg:hidden text-center mb-8">
-            <h1 className="font-display text-4xl font-bold text-gray-900 dark:text-white mb-4">Zeni</h1>
+
+      {/* Right panel — register form */}
+      <div className="flex-1 flex items-center justify-center px-6 sm:px-8 lg:px-12 bg-white dark:bg-black">
+        <div className="max-w-sm w-full">
+          {/* Mobile logo */}
+          <div className="lg:hidden flex items-center gap-2.5 mb-10">
+            <div className="w-10 h-10 bg-gray-900 dark:bg-white rounded-xl flex items-center justify-center">
+              <span className="text-white dark:text-gray-900 text-lg font-bold">Z</span>
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Zeni</h1>
           </div>
-          <div>
-            <h2 className="font-display text-3xl font-bold text-gray-900 dark:text-white">Criar Conta</h2>
-            <p className="mt-2 text-gray-600 dark:text-gray-400">Registre-se para começar</p>
+
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Criar Conta</h2>
+            <p className="mt-1.5 text-sm text-gray-500 dark:text-gray-400">Registre-se para começar</p>
           </div>
-          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {error && (
-              <div className="rounded-xl bg-danger-50 dark:bg-danger-900/20 border border-danger-200 dark:border-danger-800 p-4">
-                <p className="text-sm text-danger-700 dark:text-danger-400 font-medium">{error}</p>
+
+          <form className="space-y-4" onSubmit={handleSubmit}>
+            {error && (
+              <div className="rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 p-3.5">
+                <p className="text-sm text-red-700 dark:text-red-400 font-medium">{error}</p>
               </div>
-          )}
-            <div className="grid grid-cols-2 gap-4">
-            <div>
-                <label htmlFor="first_name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nome</label>
-              <input
-                id="first_name"
-                name="first_name"
-                type="text"
-                required
-                value={formData.first_name}
-                onChange={handleChange}
-                  className="block w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-soft placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-white bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all sm:text-sm"
-              />
-            </div>
-            <div>
-                <label htmlFor="last_name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Sobrenome</label>
-              <input
-                id="last_name"
-                name="last_name"
-                type="text"
-                required
-                value={formData.last_name}
-                onChange={handleChange}
-                  className="block w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-soft placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-white bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all sm:text-sm"
-              />
-            </div>
-          </div>
+            )}
 
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              required
-              value={formData.email}
-              onChange={handleChange}
-                className="block w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-soft placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-white bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all sm:text-sm"
-            />
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label htmlFor="first_name" className="block text-[11px] font-medium text-gray-400 mb-1.5 uppercase tracking-wider">Nome</label>
+                <input id="first_name" name="first_name" type="text" required value={formData.first_name} onChange={handleChange} className={inputClass} />
+              </div>
+              <div>
+                <label htmlFor="last_name" className="block text-[11px] font-medium text-gray-400 mb-1.5 uppercase tracking-wider">Sobrenome</label>
+                <input id="last_name" name="last_name" type="text" required value={formData.last_name} onChange={handleChange} className={inputClass} />
+              </div>
             </div>
 
             <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Telefone</label>
-            <input
-              id="phone"
-              name="phone"
-              type="tel"
-              required
-              value={formData.phone}
-              onChange={handleChange}
-              placeholder="+5511999999999"
-                className="block w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-soft placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-white bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all sm:text-sm"
-            />
+              <label htmlFor="email" className="block text-[11px] font-medium text-gray-400 mb-1.5 uppercase tracking-wider">Email</label>
+              <input id="email" name="email" type="email" required value={formData.email} onChange={handleChange} placeholder="seu@email.com" className={inputClass} />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Senha</label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              required
-              value={formData.password}
-              onChange={handleChange}
-                className="block w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-soft placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-white bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all sm:text-sm"
-            />
+              <label htmlFor="phone" className="block text-[11px] font-medium text-gray-400 mb-1.5 uppercase tracking-wider">Telefone</label>
+              <input id="phone" name="phone" type="tel" required value={formData.phone} onChange={handleChange} placeholder="(00) 00000-0000" className={inputClass} />
             </div>
 
             <div>
-              <label htmlFor="access_code" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Código de Acesso</label>
-            <input
-              id="access_code"
-              name="access_code"
-              type="text"
-              required
-              value={formData.access_code}
-              onChange={handleChange}
-                className="block w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-soft placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-white bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all sm:text-sm"
-            />
+              <label htmlFor="password" className="block text-[11px] font-medium text-gray-400 mb-1.5 uppercase tracking-wider">Senha</label>
+              <input id="password" name="password" type="password" required value={formData.password} onChange={handleChange} placeholder="••••••••" className={inputClass} />
             </div>
 
             <div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full flex justify-center items-center py-3.5 px-4 rounded-xl text-base font-semibold text-white bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-medium hover:shadow-hard"
-              >
-                {loading ? 'Registrando...' : 'Registrar'}
-              </button>
+              <label htmlFor="access_code" className="block text-[11px] font-medium text-gray-400 mb-1.5 uppercase tracking-wider">Código de Acesso</label>
+              <input id="access_code" name="access_code" type="text" required value={formData.access_code} onChange={handleChange} className={inputClass} />
             </div>
 
-            <div className="text-sm text-center">
-              <Link href="/login" className="font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors">
-                Já tem uma conta? Faça login
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full flex justify-center items-center py-3 px-4 rounded-xl text-sm font-semibold text-white bg-gray-900 hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 dark:focus:ring-white disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            >
+              {loading ? 'Registrando...' : 'Registrar'}
+            </button>
+
+            <div className="text-center pt-2">
+              <Link href="/login" className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+                Já tem uma conta? <span className="font-medium underline underline-offset-4">Faça login</span>
               </Link>
             </div>
           </form>

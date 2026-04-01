@@ -6,7 +6,7 @@ import { useProfile, useUpdateProfile, useInitPreferences, useUpdatePreferences 
 import { handleApiError } from '@/lib/utils/error';
 import { useToast } from '@/contexts/ToastContext';
 import { UserPreferences } from '@/types';
-import { User, Phone, Mail, Globe, Moon, Sun, Shield, ChevronRight } from 'lucide-react';
+import { CircleUser, Phone, Mail, Globe, Moon, Sun, Lock, ChevronRight, Landmark } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import Loading from '@/components/Loading';
@@ -134,7 +134,7 @@ export default function ProfilePage() {
           <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-900">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                <User className="h-4 w-4 text-gray-500" />
+                <CircleUser className="h-4 w-4 text-gray-500" strokeWidth={1.8} />
               </div>
               <h2 className="text-sm font-semibold text-gray-900 dark:text-white">Informações Pessoais</h2>
             </div>
@@ -180,7 +180,7 @@ export default function ProfilePage() {
                   value={profile?.email || ''}
                   className="cursor-not-allowed opacity-50"
                 />
-                <Shield className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-300" />
+                <Lock className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-300" strokeWidth={1.8} />
               </div>
             </div>
 

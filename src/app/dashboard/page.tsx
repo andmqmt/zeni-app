@@ -6,7 +6,7 @@ import { useTransactionsWithPreview } from '@/hooks/useTransactionsWithPreview';
 import { useProfile } from '@/hooks/useUser';
 import { usePreviewTransactions } from '@/contexts/PreviewTransactionContext';
 import CurrencyDisplay from '@/components/CurrencyDisplay';
-import { TrendingUp, TrendingDown, Wallet, ChevronLeft, ChevronRight } from 'lucide-react';
+import { TrendingUp, TrendingDown, PiggyBank, ChevronLeft, ChevronRight, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import Calendar from '@/components/Calendar';
 import DayList from '@/components/DayList';
@@ -122,13 +122,13 @@ export default function DashboardPage() {
           <div className="flex items-center gap-1 mt-1.5">
             <button
               onClick={handlePreviousMonth}
-              className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
+              className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
             >
-              <ChevronLeft className="h-4 w-4 text-gray-400" />
+              <ChevronLeft className="h-4 w-4 text-gray-400" strokeWidth={2} />
             </button>
             <button
               onClick={handleToday}
-              className={`text-sm px-2 py-0.5 rounded-md transition-colors ${
+              className={`text-sm px-2.5 py-0.5 rounded-lg transition-colors ${
                 isCurrentMonth
                   ? 'text-gray-500 dark:text-gray-400'
                   : 'text-gray-900 dark:text-white font-medium hover:bg-gray-100 dark:hover:bg-gray-900'
@@ -138,75 +138,105 @@ export default function DashboardPage() {
             </button>
             <button
               onClick={handleNextMonth}
-              className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
+              className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
             >
-              <ChevronRight className="h-4 w-4 text-gray-400" />
+              <ChevronRight className="h-4 w-4 text-gray-400" strokeWidth={2} />
             </button>
           </div>
         </div>
 
-        {/* Summary — mobile: stacked hero card + row; desktop: 3 columns */}
-        {/* Mobile: Hero balance card */}
+        {/* === MOBILE SUMMARY === */}
         <div className="md:hidden space-y-3">
-          <div className="bg-gray-900 dark:bg-gray-100 rounded-2xl p-5">
-            <div className="flex items-center gap-1.5 mb-1">
-              <Wallet className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500" />
-              <span className="text-[11px] font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider">Saldo do mês</span>
-            </div>
-            <div className={`text-3xl font-semibold tracking-tight ${
-              endOfMonthBalance >= 0 ? 'text-white dark:text-gray-900' : 'text-red-400 dark:text-red-600'
-            }`}>
-              <CurrencyDisplay value={endOfMonthBalance} />
+          {/* Hero balance + progress */}
+          <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 dark:from-white dark:via-gray-50 dark:to-white rounded-2xl p-5 relative overflow-hidden">
+            {/* Decorative ring */}
+            <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full border border-white/5 dark:border-gray-900/5" />
+            <div className="absolute -bottom-6 -left-6 w-24 h-24 rounded-full border border-white/5 dark:border-gray-900/5" />
+            <div className="relative">
+              <div className="flex items-center gap-1.5 mb-1">
+                <PiggyBank className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500" strokeWidth={1.8} />
+                <span className="text-[11px] font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider">Saldo do mês</span>
+              </div>
+              <div className={`text-3xl font-bold tracking-tight font-display ${
+                endOfMonthBalance >= 0 ? 'text-white dark:text-gray-900' : 'text-red-400 dark:text-red-600'
+              }`}>
+                <CurrencyDisplay value={endOfMonthBalance} />
+              </div>
+              {/* Mini progress bar */}
+              {totalIncome > 0 && (
+                <div className="mt-3 flex items-center gap-2">
+                  <div className="flex-1 h-1 bg-white/10 dark:bg-gray-900/10 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-emerald-400 dark:bg-emerald-600 rounded-full transition-all duration-700"
+                      style={{ width: `${Math.min((endOfMonthBalance / totalIncome) * 100, 100)}%` }}
+                    />
+                  </div>
+                  <span className="text-[10px] text-gray-400 dark:text-gray-500 tabular-nums font-medium">
+                    {totalIncome > 0 ? Math.round((endOfMonthBalance / totalIncome) * 100) : 0}%
+                  </span>
+                </div>
+              )}
             </div>
           </div>
+          {/* Income / Expense mini cards */}
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-white dark:bg-gray-950 rounded-2xl p-4 border border-gray-100 dark:border-gray-900">
-              <div className="flex items-center gap-1.5 mb-1.5">
-                <TrendingUp className="w-3 h-3 text-green-500" />
+              <div className="flex items-center justify-between mb-2">
                 <span className="text-[10px] font-medium text-gray-400 uppercase tracking-wider">Entradas</span>
+                <div className="w-6 h-6 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center">
+                  <ArrowDownLeft className="w-3 h-3 text-emerald-500" strokeWidth={2.5} />
+                </div>
               </div>
-              <div className="text-lg font-semibold text-gray-900 dark:text-white tracking-tight">
+              <div className="text-lg font-bold text-gray-900 dark:text-white tracking-tight tabular-nums">
                 <CurrencyDisplay value={totalIncome} />
               </div>
             </div>
             <div className="bg-white dark:bg-gray-950 rounded-2xl p-4 border border-gray-100 dark:border-gray-900">
-              <div className="flex items-center gap-1.5 mb-1.5">
-                <TrendingDown className="w-3 h-3 text-red-500" />
+              <div className="flex items-center justify-between mb-2">
                 <span className="text-[10px] font-medium text-gray-400 uppercase tracking-wider">Saídas</span>
+                <div className="w-6 h-6 rounded-lg bg-red-50 dark:bg-red-950/30 flex items-center justify-center">
+                  <ArrowUpRight className="w-3 h-3 text-red-500" strokeWidth={2.5} />
+                </div>
               </div>
-              <div className="text-lg font-semibold text-gray-900 dark:text-white tracking-tight">
+              <div className="text-lg font-bold text-gray-900 dark:text-white tracking-tight tabular-nums">
                 <CurrencyDisplay value={totalExpense} />
               </div>
             </div>
           </div>
         </div>
 
-        {/* Desktop: 3 equal columns */}
+        {/* === DESKTOP SUMMARY === */}
         <div className="hidden md:grid md:grid-cols-3 gap-3">
           <div className="bg-white dark:bg-gray-950 rounded-2xl p-5 border border-gray-100 dark:border-gray-900">
-            <div className="flex items-center gap-1.5 mb-2">
-              <Wallet className="w-3.5 h-3.5 text-gray-400" />
-              <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Saldo</span>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[11px] font-medium text-gray-400 uppercase tracking-wider">Saldo</span>
+              <div className="w-7 h-7 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                <PiggyBank className="w-3.5 h-3.5 text-gray-400" strokeWidth={1.8} />
+              </div>
             </div>
-            <div className={`text-2xl font-semibold tracking-tight ${endOfMonthBalance >= 0 ? 'text-gray-900 dark:text-white' : 'text-red-600 dark:text-red-400'}`}>
+            <div className={`text-2xl font-bold tracking-tight tabular-nums ${endOfMonthBalance >= 0 ? 'text-gray-900 dark:text-white' : 'text-red-600 dark:text-red-400'}`}>
               <CurrencyDisplay value={endOfMonthBalance} />
             </div>
           </div>
           <div className="bg-white dark:bg-gray-950 rounded-2xl p-5 border border-gray-100 dark:border-gray-900">
-            <div className="flex items-center gap-1.5 mb-2">
-              <TrendingUp className="w-3.5 h-3.5 text-green-500" />
-              <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Entradas</span>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[11px] font-medium text-gray-400 uppercase tracking-wider">Entradas</span>
+              <div className="w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center">
+                <ArrowDownLeft className="w-3.5 h-3.5 text-emerald-500" strokeWidth={2.5} />
+              </div>
             </div>
-            <div className="text-2xl font-semibold text-gray-900 dark:text-white tracking-tight">
+            <div className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight tabular-nums">
               <CurrencyDisplay value={totalIncome} />
             </div>
           </div>
           <div className="bg-white dark:bg-gray-950 rounded-2xl p-5 border border-gray-100 dark:border-gray-900">
-            <div className="flex items-center gap-1.5 mb-2">
-              <TrendingDown className="w-3.5 h-3.5 text-red-500" />
-              <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Saídas</span>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[11px] font-medium text-gray-400 uppercase tracking-wider">Saídas</span>
+              <div className="w-7 h-7 rounded-lg bg-red-50 dark:bg-red-950/30 flex items-center justify-center">
+                <ArrowUpRight className="w-3.5 h-3.5 text-red-500" strokeWidth={2.5} />
+              </div>
             </div>
-            <div className="text-2xl font-semibold text-gray-900 dark:text-white tracking-tight">
+            <div className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight tabular-nums">
               <CurrencyDisplay value={totalExpense} />
             </div>
           </div>

@@ -44,92 +44,103 @@ export default function LoginPage() {
         <ThemeLanguageControls />
       </div>
 
-      <div className="hidden lg:flex lg:w-1/2 bg-gray-900 dark:bg-gray-100 relative overflow-hidden">
+      {/* Left panel — brand hero */}
+      <div className="hidden lg:flex lg:w-1/2 bg-gray-950 dark:bg-gray-50 relative overflow-hidden">
+        {/* Decorative elements */}
+        <div className="absolute top-20 left-20 w-64 h-64 rounded-full border border-white/5 dark:border-gray-900/5" />
+        <div className="absolute bottom-32 right-16 w-48 h-48 rounded-full border border-white/5 dark:border-gray-900/5" />
+        <div className="absolute top-1/2 left-1/3 w-96 h-96 rounded-full bg-emerald-500/5 dark:bg-emerald-500/5 blur-3xl" />
+        
         <div className="relative z-10 flex flex-col justify-center px-16 text-white dark:text-gray-900">
-          <h1 className="text-5xl font-bold mb-8">Zeni</h1>
-          <h2 className="text-4xl font-semibold mb-6">
+          <div className="flex items-center gap-3 mb-10">
+            <div className="w-12 h-12 bg-white dark:bg-gray-900 rounded-2xl flex items-center justify-center">
+              <span className="text-gray-900 dark:text-white text-xl font-bold">Z</span>
+            </div>
+            <h1 className="text-3xl font-bold tracking-tight">Zeni</h1>
+          </div>
+          <h2 className="text-4xl font-bold leading-tight mb-4">
             {t('login.hero.title')}<br/>
-            <span className="opacity-70">{t('login.hero.subtitle')}</span>
+            <span className="text-gray-400 dark:text-gray-500">{t('login.hero.subtitle')}</span>
           </h2>
-          <p className="text-lg opacity-80 max-w-md leading-relaxed">
+          <p className="text-base text-gray-400 dark:text-gray-500 max-w-md leading-relaxed">
             {t('login.hero.description')}
           </p>
         </div>
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-accent-500 rounded-full blur-3xl opacity-20"></div>
       </div>
 
-      <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-900">
-        <div className="max-w-md w-full space-y-8">
-          <div className="lg:hidden text-center mb-8">
-            <h1 className="font-display text-4xl font-bold text-gray-900 dark:text-white mb-4">Zeni</h1>
+      {/* Right panel — login form */}
+      <div className="flex-1 flex items-center justify-center px-6 sm:px-8 lg:px-12 bg-white dark:bg-black">
+        <div className="max-w-sm w-full">
+          {/* Mobile logo */}
+          <div className="lg:hidden flex items-center gap-2.5 mb-10">
+            <div className="w-10 h-10 bg-gray-900 dark:bg-white rounded-xl flex items-center justify-center">
+              <span className="text-white dark:text-gray-900 text-lg font-bold">Z</span>
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Zeni</h1>
           </div>
 
-          <div>
-            <h2 className="font-display text-3xl font-bold text-gray-900 dark:text-white">
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
               {t('login.welcome')}
             </h2>
-            <p className="mt-2 text-gray-600 dark:text-gray-400">
+            <p className="mt-1.5 text-sm text-gray-500 dark:text-gray-400">
               {t('login.subtitle')}
             </p>
           </div>
 
-          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          <form className="space-y-5" onSubmit={handleSubmit}>
             {error && (
-              <div className="rounded-xl bg-danger-50 dark:bg-danger-900/20 border border-danger-200 dark:border-danger-800 p-4">
-                <p className="text-sm text-danger-700 dark:text-danger-400 font-medium">{error}</p>
+              <div className="rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 p-3.5">
+                <p className="text-sm text-red-700 dark:text-red-400 font-medium">{error}</p>
               </div>
             )}
 
-            <div className="space-y-4">
-              <div>
-                <label htmlFor="identifier" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  {t('login.email')}
-                </label>
-                <input
-                  id="identifier"
-                  name="identifier"
-                  type="text"
-                  required
-                  value={identifier}
-                  onChange={(e) => setIdentifier(e.target.value)}
-                  className="block w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-soft placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-white bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                  placeholder="seu@email.com"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  {t('login.password')}
-                </label>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-soft placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-white bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                  placeholder="••••••••"
-                />
-              </div>
+            <div>
+              <label htmlFor="identifier" className="block text-[11px] font-medium text-gray-400 mb-1.5 uppercase tracking-wider">
+                {t('login.email')}
+              </label>
+              <input
+                id="identifier"
+                name="identifier"
+                type="text"
+                required
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
+                className="block w-full px-4 py-3 border border-gray-200 dark:border-gray-800 rounded-xl placeholder-gray-300 dark:placeholder-gray-600 text-gray-900 dark:text-white bg-white dark:bg-gray-950 focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white focus:border-transparent transition-all text-sm"
+                placeholder="seu@email.com"
+              />
             </div>
 
             <div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full flex justify-center items-center py-3.5 px-4 rounded-xl text-base font-semibold text-white bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-medium hover:shadow-hard"
-              >
-                {loading ? t('login.submitting') : t('login.submit')}
-              </button>
+              <label htmlFor="password" className="block text-[11px] font-medium text-gray-400 mb-1.5 uppercase tracking-wider">
+                {t('login.password')}
+              </label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="block w-full px-4 py-3 border border-gray-200 dark:border-gray-800 rounded-xl placeholder-gray-300 dark:placeholder-gray-600 text-gray-900 dark:text-white bg-white dark:bg-gray-950 focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white focus:border-transparent transition-all text-sm"
+                placeholder="••••••••"
+              />
             </div>
 
-            <div className="text-center">
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full flex justify-center items-center py-3 px-4 rounded-xl text-sm font-semibold text-white bg-gray-900 hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 dark:focus:ring-white disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            >
+              {loading ? t('login.submitting') : t('login.submit')}
+            </button>
+
+            <div className="text-center pt-2">
               <Link
                 href="/register"
-                className="text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors"
+                className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
               >
-                {t('login.noAccount')} <span className="underline">{t('login.register')}</span>
+                {t('login.noAccount')} <span className="font-medium underline underline-offset-4">{t('login.register')}</span>
               </Link>
             </div>
           </form>
