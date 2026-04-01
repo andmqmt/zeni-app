@@ -172,7 +172,7 @@ export default function FloatingTransactionButton() {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="fixed bottom-0 left-0 right-0 md:bottom-auto md:left-auto md:right-8 md:top-1/2 md:-translate-y-1/2 w-full md:w-[420px] max-h-[90vh] md:max-h-[600px] bg-white dark:bg-gray-900 rounded-t-2xl md:rounded-2xl shadow-2xl border-t md:border border-gray-200 dark:border-gray-800 z-[91] overflow-hidden flex flex-col"
+              className="fixed bottom-0 left-0 right-0 md:bottom-auto md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 w-full md:w-[420px] max-h-[90vh] md:max-h-[600px] bg-white dark:bg-gray-900 rounded-t-2xl md:rounded-2xl shadow-2xl border-t md:border border-gray-200 dark:border-gray-800 z-[91] overflow-hidden flex flex-col"
               style={{ maxHeight: 'calc(var(--vh, 100vh) - 2rem)' }}
               onClick={(e) => e.stopPropagation()}
             >

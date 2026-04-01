@@ -68,7 +68,7 @@ export const parseNumber = (value: string): number => {
 
 // Parses a date string safely in local time when it's date-only (YYYY-MM-DD).
 // Falls back to the native Date parser for other formats (e.g., ISO with time).
-const parseDateStringToLocal = (value: string): Date => {
+export const parseDateStringToLocal = (value: string): Date => {
   const isoDateOnly = /^\d{4}-\d{2}-\d{2}$/;
   if (isoDateOnly.test(value)) {
     const [y, m, d] = value.split('-').map(Number);

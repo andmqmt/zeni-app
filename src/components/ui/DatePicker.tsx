@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
-import { formatISODate } from '@/lib/utils/format';
+import { formatISODate, parseDateStringToLocal } from '@/lib/utils/format';
 
 interface DatePickerProps {
   value: string;
@@ -22,7 +22,7 @@ const weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 export default function DatePicker({ value, onChange, className = '', placeholder = 'Selecione uma data' }: DatePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(() => {
-    const date = value ? new Date(value) : new Date();
+    const date = value ? parseDateStringToLocal(value) : new Date();
     return { year: date.getFullYear(), month: date.getMonth() };
   });
   const pickerRef = useRef<HTMLDivElement>(null);
@@ -46,7 +46,7 @@ export default function DatePicker({ value, onChange, className = '', placeholde
     }
   }, [isOpen]);
 
-  const selectedDate = value ? new Date(value) : null;
+  const selectedDate = value ? parseDateStringToLocal(value) : null;
   const displayValue = selectedDate
     ? `${selectedDate.getDate().toString().padStart(2, '0')}/${(selectedDate.getMonth() + 1).toString().padStart(2, '0')}/${selectedDate.getFullYear()}`
     : placeholder;

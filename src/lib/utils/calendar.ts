@@ -1,5 +1,5 @@
 import { DailyBalance } from '@/types';
-import { formatCurrency } from './format';
+import { formatISODate } from './format';
 import { getBalanceStatusColor } from './status';
 
 export const getDaysInMonth = (year: number, month: number): Date[] => {
@@ -26,7 +26,7 @@ export const getDaysInMonth = (year: number, month: number): Date[] => {
 };
 
 export const getBalanceForDate = (date: Date, balances: DailyBalance[]): DailyBalance | null => {
-  const dateStr = date.toISOString().split('T')[0];
+  const dateStr = formatISODate(date);
   return balances.find(b => b.date === dateStr) || null;
 };
 
