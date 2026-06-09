@@ -10,6 +10,7 @@ import { TrendingUp, TrendingDown, PiggyBank, ChevronLeft, ChevronRight, ArrowUp
 import { useLanguage } from '@/contexts/LanguageContext';
 import MonthPicker from '@/components/ui/MonthPicker';
 import DayList from '@/components/DayList';
+import Calendar from '@/components/Calendar';
 import Loading from '@/components/Loading';
 import PageTransition from '@/components/PageTransition';
 import { formatISODate } from '@/lib/utils/format';
@@ -205,7 +206,14 @@ export default function DashboardPage() {
               </div>
             </div>
           ) : dailyBalance && dailyBalance.length > 0 ? (
-            <DayList year={selectedYear} month={selectedMonth} dailyBalances={dailyBalance} />
+            <>
+              <div className="hidden md:block">
+                <Calendar year={selectedYear} month={selectedMonth} dailyBalances={dailyBalance} />
+              </div>
+              <div className="block md:hidden">
+                <DayList year={selectedYear} month={selectedMonth} dailyBalances={dailyBalance} />
+              </div>
+            </>
           ) : (
             <div className="bg-white dark:bg-gray-950 rounded-2xl p-10 border border-gray-200 dark:border-gray-800">
               <div className="text-center font-medium text-gray-400 dark:text-gray-500 text-sm">
