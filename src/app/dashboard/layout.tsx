@@ -72,85 +72,57 @@ function DashboardLayoutClient({ children }: DashboardLayoutProps) {
             className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
             title={isVisible ? t('common.hideValues') : t('common.showValues')}
           >
-            {isVisible ? <Eye className="w-[18px] h-[18px] text-gray-500 dark:text-gray-400" /> : <EyeOff className="w-[18px] h-[18px] text-gray-500 dark:text-gray-400" />}
+            {isVisible ? (
+              <Eye className="w-[18px] h-[18px] text-gray-500 dark:text-gray-400" />
+            ) : (
+              <EyeOff className="w-[18px] h-[18px] text-gray-500 dark:text-gray-400" />
+            )}
           </button>
           <button
             onClick={toggleTheme}
             className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
           >
-            {theme === 'dark' ? <Sun className="w-[18px] h-[18px] text-gray-400" /> : <Moon className="w-[18px] h-[18px] text-gray-500" />}
+            {theme === 'dark' ? (
+              <Sun className="w-[18px] h-[18px] text-gray-400" />
+            ) : (
+              <Moon className="w-[18px] h-[18px] text-gray-500" />
+            )}
           </button>
         </div>
       </div>
 
-      {/* Mobile bottom tab bar */}
-      <nav className="md:hidden fixed bottom-5 left-4 right-4 max-w-lg mx-auto bg-white/75 dark:bg-black/70 backdrop-blur-2xl border border-white/20 dark:border-white/10 shadow-[0_12px_40px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.3)] z-40 flex items-center justify-between px-3 py-2 rounded-3xl transition-all duration-300">
-        {/* Home */}
-        <Link
-          href={navigation[0].href}
-          className={`flex flex-col items-center gap-0.5 py-1 px-3 rounded-2xl transition-all ${
-            pathname === navigation[0].href
-              ? 'text-gray-950 dark:text-white scale-105'
-              : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 active:scale-95'
-          }`}
-        >
-          <div className={`p-2 rounded-xl transition-all duration-300 ${
-            pathname === navigation[0].href
-              ? 'bg-gradient-to-b from-white/80 to-white/40 dark:from-white/25 dark:to-white/5 border border-white/40 dark:border-white/10 shadow-[0_2px_8px_rgba(0,0,0,0.04),inset_0_1px_1.5px_rgba(255,255,255,0.4)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.3)]' 
-              : 'border border-transparent'
-          }`}>
-            <Home className="h-4.5 w-4.5" strokeWidth={pathname === navigation[0].href ? 2.5 : 1.8} />
-          </div>
-          <span className="text-[8px] font-bold tracking-wider uppercase opacity-90">{navigation[0].name}</span>
-        </Link>
+      {/* Mobile bottom tab bar — simple, minimal */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-black/90 backdrop-blur-xl border-t border-gray-100 dark:border-gray-900 z-40 flex items-stretch">
+        {navigation.map((item) => {
+          const Icon = item.icon;
+          const isActive = pathname === item.href;
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`flex-1 flex flex-col items-center justify-center gap-1 py-3 transition-colors ${
+                isActive
+                  ? 'text-gray-900 dark:text-white'
+                  : 'text-gray-400 dark:text-gray-600'
+              }`}
+            >
+              <Icon
+                className="w-[21px] h-[21px]"
+                strokeWidth={isActive ? 2.2 : 1.6}
+              />
+              <span className="text-[9px] font-medium leading-none">{item.name}</span>
+            </Link>
+          );
+        })}
 
-        {/* Transactions */}
-        <Link
-          href={navigation[1].href}
-          className={`flex flex-col items-center gap-0.5 py-1 px-3 rounded-2xl transition-all ${
-            pathname === navigation[1].href
-              ? 'text-gray-950 dark:text-white scale-105'
-              : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 active:scale-95'
-          }`}
-        >
-          <div className={`p-2 rounded-xl transition-all duration-300 ${
-            pathname === navigation[1].href
-              ? 'bg-gradient-to-b from-white/80 to-white/40 dark:from-white/25 dark:to-white/5 border border-white/40 dark:border-white/10 shadow-[0_2px_8px_rgba(0,0,0,0.04),inset_0_1px_1.5px_rgba(255,255,255,0.4)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.3)]' 
-              : 'border border-transparent'
-          }`}>
-            <ArrowLeftRight className="h-4.5 w-4.5" strokeWidth={pathname === navigation[1].href ? 2.5 : 1.8} />
-          </div>
-          <span className="text-[8px] font-bold tracking-wider uppercase opacity-90">{navigation[1].name}</span>
-        </Link>
-
-        {/* Plus Button */}
+        {/* Add — last item, same visual weight, minimal differentiation */}
         <button
           onClick={() => setIsModalOpen(true)}
-          className="flex flex-col items-center justify-center p-1 rounded-2xl active:scale-95 transition-all"
+          className="flex-1 flex flex-col items-center justify-center gap-1 py-3 text-gray-400 dark:text-gray-600 hover:text-gray-600 dark:hover:text-gray-400 active:text-gray-900 dark:active:text-white transition-colors"
         >
-          <div className="w-11 h-11 rounded-full flex items-center justify-center bg-gradient-to-b from-gray-900/90 to-gray-850/95 dark:from-white/20 dark:to-white/5 border border-white/30 dark:border-white/10 shadow-[0_4px_12px_rgba(0,0,0,0.15)] dark:shadow-[0_4px_12px_rgba(255,255,255,0.05),inset_0_1px_1.5px_rgba(255,255,255,0.4)] text-white dark:text-white hover:opacity-90">
-            <Plus className="w-5 h-5" strokeWidth={2.5} />
-          </div>
+          <Plus className="w-[21px] h-[21px]" strokeWidth={1.6} />
+          <span className="text-[9px] font-medium leading-none">Novo</span>
         </button>
-
-        {/* Settings */}
-        <Link
-          href={navigation[2].href}
-          className={`flex flex-col items-center gap-0.5 py-1 px-3 rounded-2xl transition-all ${
-            pathname === navigation[2].href
-              ? 'text-gray-950 dark:text-white scale-105'
-              : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 active:scale-95'
-          }`}
-        >
-          <div className={`p-2 rounded-xl transition-all duration-300 ${
-            pathname === navigation[2].href
-              ? 'bg-gradient-to-b from-white/80 to-white/40 dark:from-white/25 dark:to-white/5 border border-white/40 dark:border-white/10 shadow-[0_2px_8px_rgba(0,0,0,0.04),inset_0_1px_1.5px_rgba(255,255,255,0.4)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.3)]' 
-              : 'border border-transparent'
-          }`}>
-            <Sliders className="h-4.5 w-4.5" strokeWidth={pathname === navigation[2].href ? 2.5 : 1.8} />
-          </div>
-          <span className="text-[8px] font-bold tracking-wider uppercase opacity-90">{navigation[2].name}</span>
-        </Link>
       </nav>
 
       <div className="flex">
@@ -191,13 +163,21 @@ function DashboardLayoutClient({ children }: DashboardLayoutProps) {
                 className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
                 title={isVisible ? t('common.hideValues') : t('common.showValues')}
               >
-                {isVisible ? <Eye className="w-4 h-4 text-gray-400" /> : <EyeOff className="w-4 h-4 text-gray-400" />}
+                {isVisible ? (
+                  <Eye className="w-4 h-4 text-gray-400" />
+                ) : (
+                  <EyeOff className="w-4 h-4 text-gray-400" />
+                )}
               </button>
               <button
                 onClick={toggleTheme}
                 className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
               >
-                {theme === 'dark' ? <Sun className="w-4 h-4 text-gray-400" /> : <Moon className="w-4 h-4 text-gray-400" />}
+                {theme === 'dark' ? (
+                  <Sun className="w-4 h-4 text-gray-400" />
+                ) : (
+                  <Moon className="w-4 h-4 text-gray-400" />
+                )}
               </button>
             </div>
             <button
@@ -210,14 +190,16 @@ function DashboardLayoutClient({ children }: DashboardLayoutProps) {
           </div>
         </aside>
 
-        <main className="flex-1 min-h-screen bg-gray-50 dark:bg-black pb-24 md:pb-0">
+        <main className="flex-1 min-h-screen bg-gray-50 dark:bg-black pb-[72px] md:pb-0">
           <div className="max-w-5xl mx-auto px-5 py-4 md:px-8 md:py-6">
             {children}
           </div>
         </main>
       </div>
 
+      {/* Desktop FAB — uncontrolled, shows the floating button on md+ */}
       <FloatingTransactionButton />
+      {/* Mobile modal trigger — controlled via nav Plus button */}
       <FloatingTransactionButton isOpenExternal={isModalOpen} onCloseExternal={() => setIsModalOpen(false)} />
     </div>
   );
