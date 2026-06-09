@@ -83,7 +83,7 @@ function DashboardLayoutClient({ children }: DashboardLayoutProps) {
       </div>
 
       {/* Mobile bottom tab bar */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-black/80 backdrop-blur-xl border-t border-gray-100 dark:border-gray-900 z-40 flex items-center justify-around px-2 py-1.5 safe-area-pb">
+      <nav className="md:hidden fixed bottom-5 left-4 right-4 max-w-lg mx-auto bg-white/75 dark:bg-black/70 backdrop-blur-2xl border border-white/20 dark:border-white/10 shadow-[0_12px_40px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.3)] z-40 flex items-center justify-around px-4 py-2 rounded-3xl transition-all duration-300">
         {navigation.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href;
@@ -91,28 +91,23 @@ function DashboardLayoutClient({ children }: DashboardLayoutProps) {
             <Link
               key={item.name}
               href={item.href}
-              className={`flex flex-col items-center gap-0.5 py-1.5 px-4 rounded-xl transition-all ${
+              className={`flex flex-col items-center gap-0.5 py-1 px-3 rounded-2xl transition-all ${
                 isActive
-                  ? 'text-gray-900 dark:text-white'
-                  : 'text-gray-400 dark:text-gray-600 active:scale-95'
+                  ? 'text-gray-900 dark:text-white scale-105'
+                  : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 active:scale-95'
               }`}
             >
-              <div className={`p-1 rounded-lg transition-colors ${isActive ? 'bg-gray-900/10 dark:bg-white/10' : ''}`}>
-                <Icon className="h-5 w-5" strokeWidth={isActive ? 2.2 : 1.8} />
+              <div className={`p-1.5 rounded-xl transition-all duration-300 ${
+                isActive 
+                  ? 'bg-gray-900/10 dark:bg-white/10 shadow-[inset_0_1px_2px_rgba(255,255,255,0.2)]' 
+                  : ''
+              }`}>
+                <Icon className="h-5 w-5" strokeWidth={isActive ? 2.4 : 1.8} />
               </div>
-              <span className="text-[10px] font-medium">{item.name}</span>
+              <span className="text-[9px] font-semibold tracking-wide uppercase">{item.name}</span>
             </Link>
           );
         })}
-        <button
-          onClick={handleLogout}
-          className="flex flex-col items-center gap-0.5 py-1.5 px-4 rounded-xl text-gray-400 dark:text-gray-600 active:scale-95 transition-all"
-        >
-          <div className="p-1">
-            <Power className="h-5 w-5" strokeWidth={1.8} />
-          </div>
-          <span className="text-[10px] font-medium">{t('nav.logout')}</span>
-        </button>
       </nav>
 
       <div className="flex">
