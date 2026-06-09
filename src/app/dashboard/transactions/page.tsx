@@ -444,7 +444,7 @@ export default function TransactionsPage() {
                             isPreviewTransaction ? 'bg-amber-50/50 dark:bg-amber-950/10 border-l-2 border-amber-400 dark:border-amber-600' : ''
                           }`}
                         >
-                          <div className="flex items-center justify-between gap-3">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3">
                             <div className="flex items-center gap-3 flex-1 min-w-0">
                               {/* Type indicator */}
                               <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 ${
@@ -482,7 +482,7 @@ export default function TransactionsPage() {
                                 </div>
                               </div>
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-2 pl-11 sm:pl-0">
                               <div className={`text-sm font-semibold tabular-nums ${
                                 transaction.type === "income"
                                   ? "text-emerald-600 dark:text-emerald-400"
