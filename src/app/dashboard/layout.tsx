@@ -1,13 +1,8 @@
 'use client';
 
 import { ReactNode, useEffect, useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
-import Link from 'next/link';
-import { Home, ArrowLeftRight, Sliders, Power, Eye, EyeOff, Sun, Moon, Plus } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { removeToken } from '@/lib/api/client';
-import { useLanguage } from '@/contexts/LanguageContext';
-import { useBalanceVisibility } from '@/contexts/BalanceVisibilityContext';
-import { useTheme } from '@/contexts/ThemeContext';
 import FloatingTransactionButton from '@/components/FloatingTransactionButton';
 
 interface DashboardLayoutProps {
@@ -16,191 +11,31 @@ interface DashboardLayoutProps {
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  if (!isClient) {
-    return null;
-  }
-
+  useEffect(() => { setIsClient(true); }, []);
+  if (!isClient) return null;
   return <DashboardLayoutClient>{children}</DashboardLayoutClient>;
 }
 
 function DashboardLayoutClient({ children }: DashboardLayoutProps) {
   const router = useRouter();
-  const pathname = usePathname();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const { t } = useLanguage();
-  const { isVisible, toggleVisibility } = useBalanceVisibility();
-  const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem('token');
-      if (!token) {
-        router.replace('/login');
-      }
+      if (!token) router.replace('/login');
     }
   }, [router]);
 
-  const handleLogout = () => {
-    removeToken();
-    router.push('/login');
-  };
-
-  const navigation = [
-    { name: t('nav.home'), href: '/dashboard', icon: Home },
-    { name: t('nav.transactions'), href: '/dashboard/transactions', icon: ArrowLeftRight },
-    { name: t('nav.settings'), href: '/dashboard/profile', icon: Sliders },
-  ];
-
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-black">
-      {/* Mobile top bar */}
-      <div className="md:hidden bg-white/80 dark:bg-black/80 backdrop-blur-xl border-b border-gray-100 dark:border-gray-900 px-5 py-3 flex items-center justify-between sticky top-0 z-40">
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 bg-gray-900 dark:bg-white rounded-lg flex items-center justify-center">
-            <span className="text-white dark:text-gray-900 text-xs font-bold">Z</span>
-          </div>
-          <h1 className="text-base font-semibold text-gray-900 dark:text-white tracking-tight">Zeni</h1>
+      <main className="flex-1 min-h-screen pb-24 md:pb-10">
+        <div className="max-w-4xl mx-auto px-4 md:px-6 py-5 md:py-8">
+          {children}
         </div>
-        <div className="flex items-center gap-0.5">
-          <button
-            onClick={toggleVisibility}
-            className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
-            title={isVisible ? t('common.hideValues') : t('common.showValues')}
-          >
-            {isVisible ? (
-              <Eye className="w-[18px] h-[18px] text-gray-500 dark:text-gray-400" />
-            ) : (
-              <EyeOff className="w-[18px] h-[18px] text-gray-500 dark:text-gray-400" />
-            )}
-          </button>
-          <button
-            onClick={toggleTheme}
-            className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
-          >
-            {theme === 'dark' ? (
-              <Sun className="w-[18px] h-[18px] text-gray-400" />
-            ) : (
-              <Moon className="w-[18px] h-[18px] text-gray-500" />
-            )}
-          </button>
-        </div>
-      </div>
+      </main>
 
-      {/* Mobile bottom tab bar — simple, minimal */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-black/90 backdrop-blur-xl border-t border-gray-100 dark:border-gray-900 z-40 flex items-stretch">
-        {navigation.map((item) => {
-          const Icon = item.icon;
-          const isActive = pathname === item.href;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex-1 flex flex-col items-center justify-center gap-1 py-3 transition-colors ${
-                isActive
-                  ? 'text-gray-900 dark:text-white'
-                  : 'text-gray-400 dark:text-gray-600'
-              }`}
-            >
-              <Icon
-                className="w-[21px] h-[21px]"
-                strokeWidth={isActive ? 2.2 : 1.6}
-              />
-              <span className="text-[9px] font-medium leading-none">{item.name}</span>
-            </Link>
-          );
-        })}
-
-        {/* Add — last item, same visual weight, minimal differentiation */}
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="flex-1 flex flex-col items-center justify-center gap-1 py-3 text-gray-400 dark:text-gray-600 hover:text-gray-600 dark:hover:text-gray-400 active:text-gray-900 dark:active:text-white transition-colors"
-        >
-          <Plus className="w-[21px] h-[21px]" strokeWidth={1.6} />
-          <span className="text-[9px] font-medium leading-none">Novo</span>
-        </button>
-      </nav>
-
-      <div className="flex">
-        {/* Desktop sidebar */}
-        <aside className="hidden md:flex md:flex-col md:w-[220px] bg-white dark:bg-black border-r border-gray-100 dark:border-gray-900 min-h-screen sticky top-0">
-          <div className="p-5 flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 bg-gray-900 dark:bg-white rounded-xl flex items-center justify-center">
-                <span className="text-white dark:text-gray-900 text-sm font-bold">Z</span>
-              </div>
-              <h1 className="text-lg font-semibold text-gray-900 dark:text-white tracking-tight">Zeni</h1>
-            </div>
-          </div>
-          <nav className="flex-1 px-3 py-1 space-y-0.5">
-            {navigation.map((item) => {
-              const Icon = item.icon;
-              const isActive = pathname === item.href;
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all ${
-                    isActive
-                      ? 'bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white'
-                      : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-900/50 hover:text-gray-900 dark:hover:text-white'
-                  }`}
-                >
-                  <Icon className="h-[18px] w-[18px]" strokeWidth={isActive ? 2.2 : 1.8} />
-                  {item.name}
-                </Link>
-              );
-            })}
-          </nav>
-          <div className="p-3 space-y-1">
-            <div className="flex items-center justify-between px-3 py-1.5">
-              <button
-                onClick={toggleVisibility}
-                className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
-                title={isVisible ? t('common.hideValues') : t('common.showValues')}
-              >
-                {isVisible ? (
-                  <Eye className="w-4 h-4 text-gray-400" />
-                ) : (
-                  <EyeOff className="w-4 h-4 text-gray-400" />
-                )}
-              </button>
-              <button
-                onClick={toggleTheme}
-                className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
-              >
-                {theme === 'dark' ? (
-                  <Sun className="w-4 h-4 text-gray-400" />
-                ) : (
-                  <Moon className="w-4 h-4 text-gray-400" />
-                )}
-              </button>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-[13px] font-medium text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 transition-all"
-            >
-              <Power className="h-[18px] w-[18px]" strokeWidth={1.8} />
-              {t('nav.logout')}
-            </button>
-          </div>
-        </aside>
-
-        <main className="flex-1 min-h-screen bg-gray-50 dark:bg-black pb-[72px] md:pb-0">
-          <div className="max-w-5xl mx-auto px-5 py-4 md:px-8 md:py-6">
-            {children}
-          </div>
-        </main>
-      </div>
-
-      {/* Desktop FAB — uncontrolled, shows the floating button on md+ */}
+      {/* Mobile FAB — new transaction */}
       <FloatingTransactionButton />
-      {/* Mobile modal trigger — controlled via nav Plus button */}
-      <FloatingTransactionButton isOpenExternal={isModalOpen} onCloseExternal={() => setIsModalOpen(false)} />
     </div>
   );
 }

@@ -297,40 +297,17 @@ export default function FloatingTransactionButton({
         )}
       </AnimatePresence>
 
-      {/* FAB — floating action button */}
+      {/* FAB — mobile only, minimal */}
       {!isControlled && (
         <motion.button
           onClick={() => setIsOpen(!isOpen)}
-          className="hidden md:flex fixed bottom-8 right-8 w-14 h-14 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-full shadow-lg items-center justify-center z-[80] active:scale-95 transition-transform"
-          whileHover={{ scale: 1.05 }}
+          className="flex md:hidden fixed bottom-6 right-5 w-12 h-12 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-full shadow-md items-center justify-center z-[80] active:scale-95"
           whileTap={{ scale: 0.9 }}
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: 'spring', stiffness: 280, damping: 22, delay: 0.1 }}
         >
-          <AnimatePresence mode="wait">
-            {isOpen ? (
-              <motion.div
-                key="close"
-                initial={{ rotate: -90, opacity: 0 }}
-                animate={{ rotate: 0, opacity: 1 }}
-                exit={{ rotate: 90, opacity: 0 }}
-                transition={{ duration: 0.15 }}
-              >
-                <X className="w-6 h-6" />
-              </motion.div>
-            ) : (
-              <motion.div
-                key="plus"
-                initial={{ rotate: 90, opacity: 0 }}
-                animate={{ rotate: 0, opacity: 1 }}
-                exit={{ rotate: -90, opacity: 0 }}
-                transition={{ duration: 0.15 }}
-              >
-                <Plus className="w-6 h-6" />
-              </motion.div>
-            )}
-          </AnimatePresence>
+          <Plus className="w-5 h-5" strokeWidth={2} />
         </motion.button>
       )}
     </>
