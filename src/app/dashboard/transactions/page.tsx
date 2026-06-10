@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   useDeleteTransaction,
@@ -18,6 +18,7 @@ import {
   ArrowDownLeft,
   ArrowUpRight,
   Inbox,
+  ChevronLeft,
 } from "lucide-react";
 import { Transaction, TransactionCreate } from "@/types";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -39,6 +40,7 @@ export default function TransactionsPage() {
   const currentYear = currentDate.getFullYear();
   const currentMonth = currentDate.getMonth() + 1;
   const searchParams = useSearchParams();
+  const router = useRouter();
   
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -253,6 +255,14 @@ export default function TransactionsPage() {
   return (
     <PageTransition>
       <div className="space-y-5">
+        {/* Back nav */}
+        <button
+          onClick={() => router.back()}
+          className="inline-flex items-center gap-1.5 text-sm text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors mb-1 -ml-0.5"
+        >
+          <ChevronLeft className="w-4 h-4" strokeWidth={2} />
+          Voltar
+        </button>
         <h1 className="text-2xl font-semibold text-gray-900 dark:text-white tracking-tight">
           Transações
         </h1>

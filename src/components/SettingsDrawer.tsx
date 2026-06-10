@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { X, CircleUser, Phone, Mail, Globe, Moon, Sun, Lock, ChevronRight, Power, Eye, EyeOff } from 'lucide-react';
+import { ChevronLeft, CircleUser, Phone, Mail, Globe, Moon, Sun, Lock, ChevronRight, Power, Eye, EyeOff } from 'lucide-react';
 import { useProfile, useUpdateProfile, useInitPreferences, useUpdatePreferences } from '@/hooks/useUser';
 import { handleApiError } from '@/lib/utils/error';
 import { useToast } from '@/contexts/ToastContext';
@@ -106,16 +106,19 @@ export default function SettingsDrawer({ isOpen, onClose }: SettingsDrawerProps)
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-900 flex-shrink-0">
-          <h2 className="text-base font-semibold text-gray-900 dark:text-white">Configurações</h2>
+        {/* Header — back button style */}
+        <div className="flex items-center px-5 py-4 border-b border-gray-100 dark:border-gray-900 flex-shrink-0">
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-            aria-label="Fechar"
+            className="flex items-center gap-1.5 text-sm text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors -ml-0.5 mr-auto"
+            aria-label="Fechar configurações"
           >
-            <X className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+            <ChevronLeft className="w-4 h-4" strokeWidth={2} />
+            Voltar
           </button>
+          <h2 className="absolute left-1/2 -translate-x-1/2 text-sm font-semibold text-gray-900 dark:text-white pointer-events-none">
+            Configurações
+          </h2>
         </div>
 
         {/* Scrollable content */}
