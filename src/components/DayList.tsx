@@ -44,14 +44,12 @@ export default function DayList({ year, month, dailyBalances }: DayListProps) {
     const dateStr = formatISODate(date);
     const balance = dailyBalances.find(b => b.date === dateStr);
     
-    let isToday = false;
+    const isToday = isCurrentMonth && today.getDate() === day;
     let isPast = false;
 
     if (isCurrentMonth) {
-      isToday = day === pivotDay;
       isPast = day < pivotDay;
     } else {
-      isToday = false;
       isPast = date < today;
     }
 
