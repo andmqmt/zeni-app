@@ -21,13 +21,39 @@ export default function DayList({ year, month, dailyBalances }: DayListProps) {
   const { t } = useLanguage();
   const router = useRouter();
 
+  const todayDateStr = formatISODate(today);
+  const todayBalance = dailyBalances.find(b => b.date === todayDateStr);
+  const isTodayBalanceZero = !todayBalance || todayBalance.balance === 0;
+
+  let pivotDay = today.getDate();
+  if (isCurrentMonth && isTodayBalanceZero) {
+    for (let d = today.getDate(); d <= daysInMonth; d++) {
+      const date = new Date(year, month - 1, d);
+      const dateStr = formatISODate(date);
+      const balance = dailyBalances.find(b => b.date === dateStr);
+      if (balance && balance.balance !== 0) {
+        pivotDay = d;
+        break;
+      }
+    }
+  }
+
   const allDays = Array.from({ length: daysInMonth }, (_, i) => {
     const day = i + 1;
     const date = new Date(year, month - 1, day);
     const dateStr = formatISODate(date);
     const balance = dailyBalances.find(b => b.date === dateStr);
-    const isToday = isCurrentMonth && today.getDate() === day;
-    const isPast = date < today && !isToday;
+    
+    let isToday = false;
+    let isPast = false;
+
+    if (isCurrentMonth) {
+      isToday = day === pivotDay;
+      isPast = day < pivotDay;
+    } else {
+      isToday = false;
+      isPast = date < today;
+    }
 
     return { day, date, balance, isToday, isPast, dateStr };
   });
@@ -100,7 +126,7 @@ export default function DayList({ year, month, dailyBalances }: DayListProps) {
                 </div>
 
                 {/* Status info */}
-                <div>
+                <div className="flex items-center gap-2">
                   {balance ? (
                     <div className="flex items-center gap-2">
                       <div className={`w-2 h-2 rounded-full ${statusDot(balance.status || '')} shadow-sm`} />
@@ -112,6 +138,11 @@ export default function DayList({ year, month, dailyBalances }: DayListProps) {
                     </div>
                   ) : (
                     <span className="text-xs text-gray-400 dark:text-gray-500">{t('calendar.noData')}</span>
+                  )}
+                  {isToday && (
+                    <span className="px-1.5 py-0.5 text-[10px] font-bold bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-md uppercase tracking-wider">
+                      {t('dayList.today')}
+                    </span>
                   )}
                 </div>
               </div>
