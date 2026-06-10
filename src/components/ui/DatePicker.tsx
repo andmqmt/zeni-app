@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { formatISODate, parseDateStringToLocal } from '@/lib/utils/format';
 
@@ -29,12 +28,15 @@ export default function DatePicker({
   const [isOpen, setIsOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [dropdownPos, setDropdownPos] = useState<{ top: number; left: number; width: number } | null>(null);
+  const [pos, setPos] = useState<{ top: number; left: number; width: number }>({ top: 0, left: 0, width: 280 });
   const [currentMonth, setCurrentMonth] = useState(() => {
     const date = value ? parseDateStringToLocal(value) : new Date();
     return { year: date.getFullYear(), month: date.getMonth() };
   });
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  // Flag to skip the first pointerdown that opens the picker
+  const justOpenedRef = useRef(false);
 
   useEffect(() => {
     setMounted(true);
@@ -45,92 +47,72 @@ export default function DatePicker({
     return () => mq.removeEventListener('change', handler);
   }, []);
 
-  // Position desktop dropdown via portal
-  const updatePosition = useCallback(() => {
-    if (!triggerRef.current) return;
-    const rect = triggerRef.current.getBoundingClientRect();
-    const spaceBelow = window.innerHeight - rect.bottom;
-    const panelHeight = 340;
-    const top = spaceBelow >= panelHeight
-      ? rect.bottom + 6
-      : rect.top - panelHeight - 6;
-    setDropdownPos({
-      top,
-      left: rect.left,
-      width: rect.width,
-    });
-  }, []);
-
-  useEffect(() => {
-    if (isOpen && !isMobile) {
-      updatePosition();
-      window.addEventListener('scroll', updatePosition, true);
-      window.addEventListener('resize', updatePosition);
-      return () => {
-        window.removeEventListener('scroll', updatePosition, true);
-        window.removeEventListener('resize', updatePosition);
-      };
-    }
-  }, [isOpen, isMobile, updatePosition]);
-
-  // Close on click outside (desktop portal)
+  // Close on click outside
   useEffect(() => {
     if (!isOpen) return;
 
-    const handleClick = (e: MouseEvent | TouchEvent) => {
+    const handlePointerDown = (e: PointerEvent) => {
+      // Skip the very pointerdown that triggered open
+      if (justOpenedRef.current) {
+        justOpenedRef.current = false;
+        return;
+      }
       const target = e.target as Node;
-      const panel = document.getElementById('datepicker-panel');
+      const panel = panelRef.current;
       const trigger = triggerRef.current;
-      if (panel && !panel.contains(target) && trigger && !trigger.contains(target)) {
+      if (
+        panel && !panel.contains(target) &&
+        trigger && !trigger.contains(target)
+      ) {
         setIsOpen(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClick);
-    document.addEventListener('touchstart', handleClick);
-    return () => {
-      document.removeEventListener('mousedown', handleClick);
-      document.removeEventListener('touchstart', handleClick);
-    };
+    document.addEventListener('pointerdown', handlePointerDown);
+    return () => document.removeEventListener('pointerdown', handlePointerDown);
   }, [isOpen]);
 
-  // Lock scroll when open
+  // Lock body scroll (mobile only)
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && isMobile) {
       document.body.style.overflow = 'hidden';
       return () => { document.body.style.overflow = ''; };
     }
-  }, [isOpen]);
+  }, [isOpen, isMobile]);
+
+  const openPicker = () => {
+    if (isOpen) { setIsOpen(false); return; }
+    if (triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect();
+      const panelH = 360;
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const top = spaceBelow >= panelH ? rect.bottom + 6 : rect.top - panelH - 6;
+      setPos({ top, left: rect.left, width: Math.max(rect.width, 280) });
+    }
+    justOpenedRef.current = true;
+    setIsOpen(true);
+  };
 
   const selectedDate = value ? parseDateStringToLocal(value) : null;
   const displayValue = selectedDate
     ? `${selectedDate.getDate().toString().padStart(2, '0')}/${(selectedDate.getMonth() + 1)
-        .toString()
-        .padStart(2, '0')}/${selectedDate.getFullYear()}`
+        .toString().padStart(2, '0')}/${selectedDate.getFullYear()}`
     : placeholder;
 
-  const getDaysInMonth = (year: number, month: number) => new Date(year, month + 1, 0).getDate();
-  const getFirstDayOfMonth = (year: number, month: number) => new Date(year, month, 1).getDay();
-  const isToday = (date: Date) => date.toDateString() === new Date().toDateString();
-  const isSelected = (date: Date) =>
-    selectedDate ? date.toDateString() === selectedDate.toDateString() : false;
+  const getDaysInMonth = (y: number, m: number) => new Date(y, m + 1, 0).getDate();
+  const getFirstDay = (y: number, m: number) => new Date(y, m, 1).getDay();
+  const isToday = (d: Date) => d.toDateString() === new Date().toDateString();
+  const isSelected = (d: Date) => selectedDate ? d.toDateString() === selectedDate.toDateString() : false;
 
   const handleDateSelect = (day: number) => {
-    const newDate = new Date(currentMonth.year, currentMonth.month, day);
-    onChange(formatISODate(newDate));
+    onChange(formatISODate(new Date(currentMonth.year, currentMonth.month, day)));
     setIsOpen(false);
   };
 
-  const navigateMonth = (direction: 'prev' | 'next') => {
+  const navigateMonth = (dir: 'prev' | 'next') => {
     setCurrentMonth((prev) => {
-      if (direction === 'prev') {
-        return prev.month === 0
-          ? { year: prev.year - 1, month: 11 }
-          : { year: prev.year, month: prev.month - 1 };
-      }
-      return prev.month === 11
-        ? { year: prev.year + 1, month: 0 }
-        : { year: prev.year, month: prev.month + 1 };
+      if (dir === 'prev') return prev.month === 0 ? { year: prev.year - 1, month: 11 } : { ...prev, month: prev.month - 1 };
+      return prev.month === 11 ? { year: prev.year + 1, month: 0 } : { ...prev, month: prev.month + 1 };
     });
   };
 
@@ -142,68 +124,60 @@ export default function DatePicker({
   };
 
   const daysInMonth = getDaysInMonth(currentMonth.year, currentMonth.month);
-  const firstDay = getFirstDayOfMonth(currentMonth.year, currentMonth.month);
-  const days: (number | null)[] = Array(firstDay)
-    .fill(null)
-    .concat(Array.from({ length: daysInMonth }, (_, i) => i + 1));
+  const firstDay = getFirstDay(currentMonth.year, currentMonth.month);
+  const days: (number | null)[] = Array(firstDay).fill(null).concat(
+    Array.from({ length: daysInMonth }, (_, i) => i + 1)
+  );
 
-  // Shared calendar content
-  const CalendarContent = ({ compact = false }: { compact?: boolean }) => (
+  const MonthNav = () => (
+    <div className="flex items-center justify-between mb-3">
+      <button
+        type="button"
+        onClick={() => navigateMonth('prev')}
+        className="w-10 h-10 rounded-xl flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-700 transition-colors touch-manipulation"
+        aria-label="Mês anterior"
+      >
+        <ChevronLeft className="w-5 h-5 text-gray-600 dark:text-gray-400" strokeWidth={2} />
+      </button>
+      <span className="text-sm font-semibold text-gray-900 dark:text-white select-none">
+        {months[currentMonth.month]} {currentMonth.year}
+      </span>
+      <button
+        type="button"
+        onClick={() => navigateMonth('next')}
+        className="w-10 h-10 rounded-xl flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-700 transition-colors touch-manipulation"
+        aria-label="Próximo mês"
+      >
+        <ChevronRight className="w-5 h-5 text-gray-600 dark:text-gray-400" strokeWidth={2} />
+      </button>
+    </div>
+  );
+
+  const DayGrid = ({ cellMin }: { cellMin: string }) => (
     <>
-      {/* Month nav */}
-      <div className="flex items-center justify-between mb-4">
-        <button
-          type="button"
-          onClick={() => navigateMonth('prev')}
-          className="w-11 h-11 rounded-xl flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-700 transition-colors touch-manipulation"
-          aria-label="Mês anterior"
-        >
-          <ChevronLeft className="w-5 h-5 text-gray-600 dark:text-gray-400" strokeWidth={2} />
-        </button>
-        <span className="text-sm font-semibold text-gray-900 dark:text-white">
-          {months[currentMonth.month]} {currentMonth.year}
-        </span>
-        <button
-          type="button"
-          onClick={() => navigateMonth('next')}
-          className="w-11 h-11 rounded-xl flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-700 transition-colors touch-manipulation"
-          aria-label="Próximo mês"
-        >
-          <ChevronRight className="w-5 h-5 text-gray-600 dark:text-gray-400" strokeWidth={2} />
-        </button>
-      </div>
-
-      {/* Weekday headers */}
       <div className="grid grid-cols-7 mb-1">
-        {weekDays.map((day) => (
-          <div
-            key={day}
-            className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 text-center py-1 uppercase tracking-wider"
-          >
-            {day}
+        {weekDays.map((d) => (
+          <div key={d} className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 text-center py-1 uppercase tracking-wider">
+            {d}
           </div>
         ))}
       </div>
-
-      {/* Day grid */}
       <div className="grid grid-cols-7 gap-0.5">
-        {days.map((day, index) => {
-          if (day === null) return <div key={`empty-${index}`} className="aspect-square" />;
+        {days.map((day, i) => {
+          if (day === null) return <div key={`e-${i}`} className="aspect-square" />;
           const date = new Date(currentMonth.year, currentMonth.month, day);
-          const todayDate = isToday(date);
-          const selected = isSelected(date);
+          const today = isToday(date);
+          const sel = isSelected(date);
           return (
             <button
               key={day}
               type="button"
               onClick={() => handleDateSelect(day)}
-              className={`aspect-square rounded-lg text-sm font-medium transition-all touch-manipulation flex items-center justify-center ${
-                compact ? 'min-h-[36px]' : 'min-h-[44px]'
-              } ${
-                selected
+              className={`aspect-square rounded-lg text-sm font-medium transition-all touch-manipulation flex items-center justify-center ${cellMin} ${
+                sel
                   ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-semibold'
-                  : todayDate
-                  ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white font-semibold ring-1 ring-gray-300 dark:ring-gray-600'
+                  : today
+                  ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white ring-1 ring-gray-300 dark:ring-gray-600'
                   : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-900 active:bg-gray-100 dark:active:bg-gray-800'
               }`}
             >
@@ -212,16 +186,17 @@ export default function DatePicker({
           );
         })}
       </div>
-
-      {/* Today shortcut */}
-      <button
-        type="button"
-        onClick={goToToday}
-        className="w-full mt-3 py-2.5 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-900 active:bg-gray-100 dark:active:bg-gray-800 rounded-xl transition-colors touch-manipulation border border-gray-200 dark:border-gray-800"
-      >
-        Hoje
-      </button>
     </>
+  );
+
+  const TodayBtn = () => (
+    <button
+      type="button"
+      onClick={goToToday}
+      className="w-full mt-3 py-2.5 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-900 rounded-xl transition-colors touch-manipulation border border-gray-200 dark:border-gray-800"
+    >
+      Hoje
+    </button>
   );
 
   return (
@@ -230,7 +205,7 @@ export default function DatePicker({
       <button
         ref={triggerRef}
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={openPicker}
         className="w-full h-11 px-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white focus:border-transparent transition-all flex items-center gap-2.5"
       >
         <Calendar className="w-4 h-4 text-gray-400 dark:text-gray-500 flex-shrink-0" strokeWidth={1.8} />
@@ -239,79 +214,64 @@ export default function DatePicker({
         </span>
       </button>
 
-      {mounted && (
-        <AnimatePresence>
-          {isOpen && (
-            isMobile ? (
-              // ── MOBILE: bottom sheet via portal ──
-              <>
-                {createPortal(
-                  <motion.div
-                    key="backdrop"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[200]"
+      {mounted && isOpen && (
+        isMobile ? (
+          // ── MOBILE: bottom sheet ──
+          createPortal(
+            <>
+              {/* Backdrop */}
+              <div
+                className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[200]"
+                onClick={() => setIsOpen(false)}
+              />
+              {/* Sheet */}
+              <div
+                ref={panelRef}
+                className="fixed bottom-0 left-0 right-0 z-[201] bg-white dark:bg-gray-950 rounded-t-2xl shadow-2xl border-t border-gray-200 dark:border-gray-800 p-5"
+                style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}
+              >
+                {/* Header */}
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-base font-semibold text-gray-900 dark:text-white">
+                    Selecionar data
+                  </span>
+                  <button
+                    type="button"
                     onClick={() => setIsOpen(false)}
-                  />,
-                  document.body
-                )}
-                {createPortal(
-                  <motion.div
-                    key="sheet"
-                    id="datepicker-panel"
-                    initial={{ y: '100%' }}
-                    animate={{ y: 0 }}
-                    exit={{ y: '100%' }}
-                    transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-                    className="fixed bottom-0 left-0 right-0 z-[201] bg-white dark:bg-gray-950 rounded-t-2xl shadow-2xl border-t border-gray-200 dark:border-gray-800 p-5 pb-8"
-                    style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom))' }}
+                    className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-700 transition-colors touch-manipulation -mr-1"
+                    aria-label="Fechar"
                   >
-                    {/* Header with close button */}
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-base font-semibold text-gray-900 dark:text-white">
-                        Selecionar data
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => setIsOpen(false)}
-                        className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-700 transition-colors touch-manipulation -mr-1"
-                        aria-label="Fechar"
-                      >
-                        <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-                      </button>
-                    </div>
-                    <CalendarContent />
-                  </motion.div>,
-                  document.body
-                )}
-              </>
-            ) : (
-              // ── DESKTOP: floating panel via portal, positioned absolutely ──
-              createPortal(
-                <motion.div
-                  key="desktop-panel"
-                  id="datepicker-panel"
-                  initial={{ opacity: 0, y: -6, scale: 0.97 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -6, scale: 0.97 }}
-                  transition={{ duration: 0.15, ease: 'easeOut' }}
-                  style={{
-                    position: 'fixed',
-                    top: dropdownPos?.top ?? 0,
-                    left: dropdownPos?.left ?? 0,
-                    width: Math.max(dropdownPos?.width ?? 0, 280),
-                    zIndex: 9999,
-                  }}
-                  className="bg-white dark:bg-gray-950 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-800 p-4"
-                >
-                  <CalendarContent compact />
-                </motion.div>,
-                document.body
-              )
-            )
-          )}
-        </AnimatePresence>
+                    <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                  </button>
+                </div>
+                <MonthNav />
+                <DayGrid cellMin="min-h-[44px]" />
+                <TodayBtn />
+              </div>
+            </>,
+            document.body
+          )
+        ) : (
+          // ── DESKTOP: fixed portal panel ──
+          createPortal(
+            <div
+              ref={panelRef}
+              style={{
+                position: 'fixed',
+                top: pos.top,
+                left: pos.left,
+                width: pos.width,
+                zIndex: 99999,
+              }}
+              className="bg-white dark:bg-gray-950 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-800 p-4"
+            >
+              <MonthNav />
+              <DayGrid cellMin="min-h-[32px]" />
+              <TodayBtn />
+            </div>,
+            document.body
+          )
+        )
       )}
     </div>
   );
