@@ -8,7 +8,7 @@ import { usePreviewTransactions } from '@/contexts/PreviewTransactionContext';
 import { useBalanceVisibility } from '@/contexts/BalanceVisibilityContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import CurrencyDisplay from '@/components/CurrencyDisplay';
-import { PiggyBank, ArrowUpRight, ArrowDownLeft, Settings, Sun, Moon, Eye, EyeOff, ExternalLink } from 'lucide-react';
+import { PiggyBank, ArrowUpRight, ArrowDownLeft, Settings, Sun, Moon, Eye, EyeOff, ExternalLink, Plus } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import MonthPicker from '@/components/ui/MonthPicker';
 import DayList from '@/components/DayList';
@@ -94,31 +94,42 @@ export default function DashboardPage() {
           </div>
 
           {/* Controls */}
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
+            {/* Nova transação — desktop only */}
             <button
-              onClick={toggleVisibility}
-              className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
-              title={isVisible ? 'Ocultar valores' : 'Mostrar valores'}
+              onClick={() => setNewTxOpen(true)}
+              className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-sm font-medium hover:bg-gray-700 dark:hover:bg-gray-100 transition-colors"
             >
-              {isVisible
-                ? <Eye className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-                : <EyeOff className="w-4 h-4 text-gray-500 dark:text-gray-400" />}
+              <Plus className="w-3.5 h-3.5" strokeWidth={2.5} />
+              Nova transação
             </button>
-            <button
-              onClick={toggleTheme}
-              className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
-            >
-              {theme === 'dark'
-                ? <Sun className="w-4 h-4 text-gray-400" />
-                : <Moon className="w-4 h-4 text-gray-500" />}
-            </button>
-            <button
-              onClick={() => setSettingsOpen(true)}
-              className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
-              aria-label="Configurações"
-            >
-              <Settings className="w-4 h-4 text-gray-500 dark:text-gray-400" strokeWidth={1.8} />
-            </button>
+
+            <div className="flex items-center gap-1">
+              <button
+                onClick={toggleVisibility}
+                className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
+                title={isVisible ? 'Ocultar valores' : 'Mostrar valores'}
+              >
+                {isVisible
+                  ? <Eye className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                  : <EyeOff className="w-4 h-4 text-gray-500 dark:text-gray-400" />}
+              </button>
+              <button
+                onClick={toggleTheme}
+                className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
+              >
+                {theme === 'dark'
+                  ? <Sun className="w-4 h-4 text-gray-400" />
+                  : <Moon className="w-4 h-4 text-gray-500" />}
+              </button>
+              <button
+                onClick={() => setSettingsOpen(true)}
+                className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
+                aria-label="Configurações"
+              >
+                <Settings className="w-4 h-4 text-gray-500 dark:text-gray-400" strokeWidth={1.8} />
+              </button>
+            </div>
           </div>
         </div>
 
