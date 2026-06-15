@@ -19,6 +19,7 @@ import {
   ArrowUpRight,
   Inbox,
   ChevronLeft,
+  Plus,
 } from "lucide-react";
 import { Transaction, TransactionCreate } from "@/types";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -34,6 +35,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import DatePicker from "@/components/ui/DatePicker";
 import MonthPicker from "@/components/ui/MonthPicker";
 import { Save } from "lucide-react";
+import FloatingTransactionButton from "@/components/FloatingTransactionButton";
 
 export default function TransactionsPage() {
   const currentDate = new Date();
@@ -53,6 +55,7 @@ export default function TransactionsPage() {
   const toast = useToast();
   const queryClient = useQueryClient();
   const { previewTransactions, savePreview, removePreview } = usePreviewTransactions();
+  const [isNewTransactionOpen, setIsNewTransactionOpen] = useState(false);
 
   useEffect(() => {
     const dateParam = searchParams.get('date');
@@ -255,17 +258,35 @@ export default function TransactionsPage() {
   return (
     <PageTransition>
       <div className="space-y-5">
-        {/* Back nav */}
-        <button
-          onClick={() => router.back()}
-          className="inline-flex items-center gap-1.5 text-sm text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors mb-1 -ml-0.5"
-        >
-          <ChevronLeft className="w-4 h-4" strokeWidth={2} />
-          Voltar
-        </button>
-        <h1 className="text-2xl font-semibold text-gray-900 dark:text-white tracking-tight">
-          Transações
-        </h1>
+        {/* Header */}
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => router.back()}
+              className="inline-flex items-center gap-1.5 text-sm text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors -ml-0.5"
+            >
+              <ChevronLeft className="w-4 h-4" strokeWidth={2} />
+              Voltar
+            </button>
+          </div>
+          <h1 className="text-2xl font-semibold text-gray-900 dark:text-white tracking-tight flex-1 text-center sm:text-left">
+            Transações
+          </h1>
+          {/* Desktop: Nova Transação button */}
+          <button
+            onClick={() => setIsNewTransactionOpen(true)}
+            className="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors shadow-sm"
+          >
+            <Plus className="w-4 h-4" strokeWidth={2.5} />
+            Nova Transação
+          </button>
+        </div>
+
+        {/* FloatingTransactionButton controlled by desktop button */}
+        <FloatingTransactionButton
+          isOpenExternal={isNewTransactionOpen}
+          onCloseExternal={() => setIsNewTransactionOpen(false)}
+        />
 
         <Dialog open={showForm} onOpenChange={setShowForm}>
           <DialogContent>

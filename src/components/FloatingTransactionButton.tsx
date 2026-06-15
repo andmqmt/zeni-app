@@ -96,10 +96,8 @@ export default function FloatingTransactionButton({
     return true;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validateForm()) return;
-
+  const saveTransaction = async (): Promise<boolean> => {
+    if (!validateForm()) return false;
     setIsProcessing(true);
     try {
       await transactionService.create({
@@ -110,17 +108,32 @@ export default function FloatingTransactionButton({
       });
       await queryClient.invalidateQueries({ queryKey: ['transactions'] });
       await queryClient.invalidateQueries({ queryKey: ['dailyBalance'] });
-
-      const typeText = formData.type === 'income' ? 'Receita' : 'Despesa';
-      success(`${typeText} "${formData.description}" registrada`);
-      setFormData(initialFormData());
-      setTimeout(() => setIsOpen(false), 300);
+      return true;
     } catch (err: any) {
       console.error('Transaction error:', err);
       error('Erro ao criar transação. Tente novamente.');
+      return false;
     } finally {
       setIsProcessing(false);
     }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const saved = await saveTransaction();
+    if (!saved) return;
+    const typeText = formData.type === 'income' ? 'Receita' : 'Despesa';
+    success(`${typeText} "${formData.description}" registrada`);
+    setFormData(initialFormData());
+    setTimeout(() => setIsOpen(false), 300);
+  };
+
+  const handleSaveAndCreateNew = async () => {
+    const saved = await saveTransaction();
+    if (!saved) return;
+    const typeText = formData.type === 'income' ? 'Receita' : 'Despesa';
+    success(`${typeText} "${formData.description}" registrada — adicione outra`);
+    setFormData(initialFormData());
   };
 
   const handlePreview = () => {
@@ -265,20 +278,14 @@ export default function FloatingTransactionButton({
                     />
                   </div>
 
-                  {/* Actions — clean, two main buttons */}
-                  <div className="flex gap-3 pt-1">
+                  {/* Actions */}
+                  <div className="flex flex-col gap-2 pt-1">
+                    {/* Primary: Save + Create New */}
                     <button
                       type="button"
-                      onClick={handlePreview}
+                      onClick={handleSaveAndCreateNew}
                       disabled={isProcessing}
-                      className="flex-1 py-3 rounded-xl text-sm font-medium border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors disabled:opacity-50"
-                    >
-                      Preview
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={isProcessing}
-                      className="flex-[2] py-3 rounded-xl text-sm font-medium bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                      className="w-full py-3 rounded-xl text-sm font-medium bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                     >
                       {isProcessing ? (
                         <>
@@ -286,9 +293,35 @@ export default function FloatingTransactionButton({
                           Salvando...
                         </>
                       ) : (
-                        'Salvar'
+                        'Salvar e Criar Nova'
                       )}
                     </button>
+
+                    {/* Secondary row */}
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={handlePreview}
+                        disabled={isProcessing}
+                        className="flex-1 py-2.5 rounded-xl text-sm font-medium border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors disabled:opacity-50"
+                      >
+                        Preview
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={isProcessing}
+                        className="flex-1 py-2.5 rounded-xl text-sm font-medium border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                      >
+                        {isProcessing ? (
+                          <>
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            Salvando...
+                          </>
+                        ) : (
+                          'Salvar e Fechar'
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </form>
               </div>
