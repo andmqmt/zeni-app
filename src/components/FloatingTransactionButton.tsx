@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, X, Loader2, ArrowDownLeft, ArrowUpRight } from 'lucide-react';
 import { transactionService } from '@/lib/api/transaction.service';
@@ -211,6 +212,9 @@ export default function FloatingTransactionButton({
   const [isOpenInternal, setIsOpenInternal] = useState(false);
   const isControlled = isOpenExternal !== undefined;
   const isOpen = isControlled ? isOpenExternal : isOpenInternal;
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => { setMounted(true); }, []);
 
   const setIsOpen = (value: boolean) => {
     if (isControlled) {
@@ -337,55 +341,59 @@ export default function FloatingTransactionButton({
 
   return (
     <>
-      <AnimatePresence>
-        {isOpen && (
-          <>
-            {/* Backdrop — no blur to avoid visible strip at top */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="fixed inset-0 bg-black/60 z-[90]"
-              onClick={resetAndClose}
-            />
+      {/* All modal content rendered in document.body to escape any CSS transform context */}
+      {mounted && createPortal(
+        <AnimatePresence>
+          {isOpen && (
+            <>
+              {/* Backdrop */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="fixed inset-0 bg-black/60 z-[90]"
+                onClick={resetAndClose}
+              />
 
-            {/* ── Mobile: bottom sheet ── */}
-            <motion.div
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '100%' }}
-              transition={{ type: 'spring', damping: 30, stiffness: 320 }}
-              className="fixed z-[91] inset-x-0 bottom-0 md:hidden"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div
-                className="w-full bg-white dark:bg-gray-950 rounded-t-2xl shadow-2xl overflow-hidden flex flex-col"
-                style={{ maxHeight: 'calc(var(--vh, 1vh) * 88)' }}
-              >
-                <TransactionFormContent {...formProps} />
-              </div>
-            </motion.div>
-
-            {/* ── Desktop: centered dialog ── */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.96, y: -8 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.96, y: -8 }}
-              transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-              className="hidden md:flex fixed inset-0 z-[91] items-center justify-center"
-              onClick={resetAndClose}
-            >
-              <div
-                className="w-[400px] max-w-[calc(100vw-2rem)] bg-white dark:bg-gray-950 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col max-h-[90vh]"
+              {/* ── Mobile: bottom sheet ── */}
+              <motion.div
+                initial={{ y: '100%' }}
+                animate={{ y: 0 }}
+                exit={{ y: '100%' }}
+                transition={{ type: 'spring', damping: 30, stiffness: 320 }}
+                className="fixed z-[91] inset-x-0 bottom-0 md:hidden"
                 onClick={(e) => e.stopPropagation()}
               >
-                <TransactionFormContent {...formProps} />
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+                <div
+                  className="w-full bg-white dark:bg-gray-950 rounded-t-2xl shadow-2xl overflow-hidden flex flex-col"
+                  style={{ maxHeight: 'calc(var(--vh, 1vh) * 88)' }}
+                >
+                  <TransactionFormContent {...formProps} />
+                </div>
+              </motion.div>
+
+              {/* ── Desktop: centered dialog ── */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.96, y: -8 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.96, y: -8 }}
+                transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+                className="hidden md:flex fixed inset-0 z-[91] items-center justify-center"
+                onClick={resetAndClose}
+              >
+                <div
+                  className="w-[400px] max-w-[calc(100vw-2rem)] bg-white dark:bg-gray-950 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col max-h-[90vh]"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <TransactionFormContent {...formProps} />
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
 
       {/* FAB — mobile only */}
       {!isControlled && (

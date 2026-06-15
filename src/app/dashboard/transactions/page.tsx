@@ -259,23 +259,24 @@ export default function TransactionsPage() {
     <PageTransition>
       <div className="space-y-5">
         {/* Header */}
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between gap-3 min-h-[40px]">
+          {/* Left: back arrow + title */}
+          <div className="flex items-center gap-2 min-w-0">
             <button
               onClick={() => router.back()}
-              className="w-8 h-8 flex items-center justify-center rounded-xl text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors -ml-1"
+              className="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-xl text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors -ml-1 touch-manipulation"
               aria-label="Voltar"
             >
               <ChevronLeft className="w-5 h-5" strokeWidth={2} />
             </button>
+            <h1 className="text-2xl font-semibold text-gray-900 dark:text-white tracking-tight truncate">
+              Transações
+            </h1>
           </div>
-          <h1 className="text-2xl font-semibold text-gray-900 dark:text-white tracking-tight flex-1 text-center sm:text-left">
-            Transações
-          </h1>
-          {/* Desktop: Nova Transação button */}
+          {/* Right: desktop-only button */}
           <button
             onClick={() => setIsNewTransactionOpen(true)}
-            className="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors shadow-sm"
+            className="hidden sm:inline-flex flex-shrink-0 items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors shadow-sm"
           >
             <Plus className="w-4 h-4" strokeWidth={2.5} />
             Nova Transação
