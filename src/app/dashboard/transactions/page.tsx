@@ -746,13 +746,14 @@ export default function TransactionsPage() {
       {typeof window !== 'undefined' && createPortal(
         <AnimatePresence>
           {selectedIds.size > 0 && (
-            <motion.div
+        <motion.div
               initial={{ y: 100, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 100, opacity: 0 }}
               transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-              className="fixed bottom-6 left-1/2 -translate-x-1/2 w-max z-[85] flex items-center gap-2 px-3 py-2.5 bg-gray-900 dark:bg-white rounded-2xl shadow-2xl shadow-black/30"
+              className="fixed bottom-6 left-0 right-0 z-[85] flex justify-center px-4 pointer-events-none"
             >
+              <div className="flex items-center gap-2 px-3 py-2.5 bg-gray-900 dark:bg-white rounded-2xl shadow-2xl shadow-black/30 pointer-events-auto">
               {/* Count badge */}
               <span className="flex-shrink-0 flex items-center justify-center w-7 h-7 rounded-xl bg-white/10 dark:bg-gray-900/10 text-white dark:text-gray-900 text-xs font-bold">
                 {selectedIds.size}
@@ -792,6 +793,7 @@ export default function TransactionsPage() {
               >
                 <XIcon className="w-4 h-4" />
               </button>
+            </div>
             </motion.div>
           )}
         </AnimatePresence>,
