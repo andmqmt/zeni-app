@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useSearchParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -20,6 +21,12 @@ import {
   Inbox,
   ChevronLeft,
   Plus,
+  Copy,
+  CheckSquare,
+  Square,
+  CalendarPlus,
+  X as XIcon,
+  Loader2,
 } from "lucide-react";
 import { Transaction, TransactionCreate } from "@/types";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -36,6 +43,7 @@ import DatePicker from "@/components/ui/DatePicker";
 import MonthPicker from "@/components/ui/MonthPicker";
 import { Save } from "lucide-react";
 import FloatingTransactionButton from "@/components/FloatingTransactionButton";
+import { transactionService } from "@/lib/api/transaction.service";
 
 export default function TransactionsPage() {
   const currentDate = new Date();
@@ -56,6 +64,16 @@ export default function TransactionsPage() {
   const queryClient = useQueryClient();
   const { previewTransactions, savePreview, removePreview } = usePreviewTransactions();
   const [isNewTransactionOpen, setIsNewTransactionOpen] = useState(false);
+  const [duplicateData, setDuplicateData] = useState<{
+    description: string;
+    amount: number;
+    type: 'income' | 'expense';
+    transaction_date: string;
+  } | undefined>(undefined);
+
+  // ── Multi-select state ──
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [isBulkProcessing, setIsBulkProcessing] = useState(false);
 
   useEffect(() => {
     const dateParam = searchParams.get('date');
@@ -255,38 +273,131 @@ export default function TransactionsPage() {
     setError("");
   };
 
+  const handleDuplicate = (t: Transaction) => {
+    if (isPreview(t.id)) {
+      toast.error('Transações preview não podem ser duplicadas.');
+      return;
+    }
+    setDuplicateData({
+      description: t.description,
+      amount: t.amount,
+      type: t.type,
+      transaction_date: formatISODate(new Date()),
+    });
+    setIsNewTransactionOpen(true);
+  };
+
+  // ── Bulk selection helpers ──
+  const selectableIds = transactions
+    .filter((tx) => !isPreview(tx.id))
+    .map((tx) => tx.id as number);
+
+  const allSelected =
+    selectableIds.length > 0 && selectableIds.every((id) => selectedIds.has(id));
+
+  const toggleSelect = (id: number) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (allSelected) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(selectableIds));
+    }
+  };
+
+  const clearSelection = () => setSelectedIds(new Set());
+
+  const handleDeleteSelected = async () => {
+    if (selectedIds.size === 0) return;
+    if (!confirm(`Excluir ${selectedIds.size} transações selecionadas?`)) return;
+    setIsBulkProcessing(true);
+    try {
+      await Promise.all([...selectedIds].map((id) => transactionService.delete(id)));
+      await queryClient.invalidateQueries({ queryKey: ['transactions'] });
+      await queryClient.invalidateQueries({ queryKey: ['dailyBalance'] });
+      toast.success(`${selectedIds.size} transações excluídas!`);
+      setSelectedIds(new Set());
+    } catch {
+      toast.error('Erro ao excluir. Tente novamente.');
+    } finally {
+      setIsBulkProcessing(false);
+    }
+  };
+
+  const handleDuplicateToNextMonth = async () => {
+    if (selectedIds.size === 0) return;
+    const selectedTxs = transactions.filter(
+      (tx) => !isPreview(tx.id) && selectedIds.has(tx.id as number)
+    );
+    setIsBulkProcessing(true);
+    try {
+      await Promise.all(
+        selectedTxs.map((tx) => {
+          const date = new Date(tx.transaction_date + 'T00:00:00');
+          date.setMonth(date.getMonth() + 1);
+          return transactionService.create({
+            description: tx.description,
+            amount: tx.amount,
+            type: tx.type,
+            transaction_date: formatISODate(date),
+          });
+        })
+      );
+      await queryClient.invalidateQueries({ queryKey: ['transactions'] });
+      await queryClient.invalidateQueries({ queryKey: ['dailyBalance'] });
+      toast.success(`${selectedIds.size} transações duplicadas para o próximo mês!`);
+      setSelectedIds(new Set());
+    } catch {
+      toast.error('Erro ao duplicar. Tente novamente.');
+    } finally {
+      setIsBulkProcessing(false);
+    }
+  };
+
   return (
-    <PageTransition>
+    <>
+      <PageTransition>
       <div className="space-y-5">
         {/* Header */}
-        <div className="flex items-center justify-between gap-3 min-h-[40px]">
-          {/* Left: back arrow + title */}
-          <div className="flex items-center gap-2 min-w-0">
-            <button
-              onClick={() => router.back()}
-              className="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-xl text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors -ml-1 touch-manipulation"
-              aria-label="Voltar"
-            >
-              <ChevronLeft className="w-5 h-5" strokeWidth={2} />
-            </button>
-            <h1 className="text-2xl font-semibold text-gray-900 dark:text-white tracking-tight truncate">
-              Transações
-            </h1>
-          </div>
+        <div className="relative flex items-center justify-between min-h-[40px]">
+          {/* Left: back arrow */}
+          <button
+            onClick={() => router.back()}
+            className="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-xl text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors -ml-1 touch-manipulation z-10"
+            aria-label="Voltar"
+          >
+            <ChevronLeft className="w-5 h-5" strokeWidth={2} />
+          </button>
+
+          {/* Center: title — absolutely centered on full width */}
+          <h1 className="absolute left-1/2 -translate-x-1/2 text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white tracking-tight whitespace-nowrap pointer-events-none">
+            Transações
+          </h1>
+
           {/* Right: desktop-only button */}
           <button
             onClick={() => setIsNewTransactionOpen(true)}
-            className="hidden sm:inline-flex flex-shrink-0 items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors shadow-sm"
+            className="hidden sm:inline-flex flex-shrink-0 items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors shadow-sm z-10"
           >
             <Plus className="w-4 h-4" strokeWidth={2.5} />
             Nova Transação
           </button>
         </div>
 
-        {/* FloatingTransactionButton controlled by desktop button */}
+        {/* FloatingTransactionButton controlled by desktop button — supports initialData for duplicate flow */}
         <FloatingTransactionButton
           isOpenExternal={isNewTransactionOpen}
-          onCloseExternal={() => setIsNewTransactionOpen(false)}
+          onCloseExternal={() => {
+            setIsNewTransactionOpen(false);
+            setDuplicateData(undefined);
+          }}
+          initialData={duplicateData}
         />
 
         <Dialog open={showForm} onOpenChange={setShowForm}>
@@ -444,6 +555,26 @@ export default function TransactionsPage() {
 
         {/* Transaction list */}
         <div className="bg-white dark:bg-gray-950 rounded-2xl border border-gray-100 dark:border-gray-900 overflow-hidden">
+          {/* Select-all header — only when there are selectable transactions */}
+          {!isLoading && selectableIds.length > 0 && (
+            <div className="flex items-center gap-3 px-4 py-2.5 border-b border-gray-100 dark:border-gray-900 bg-gray-50/50 dark:bg-gray-900/30">
+              <button
+                type="button"
+                onClick={toggleSelectAll}
+                className="flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors touch-manipulation"
+              >
+                {allSelected
+                  ? <CheckSquare className="w-4 h-4 text-gray-900 dark:text-white" />
+                  : <Square className="w-4 h-4" />}
+                {allSelected ? 'Desmarcar todos' : 'Selecionar todos'}
+              </button>
+              {selectedIds.size > 0 && (
+                <span className="ml-auto text-xs text-gray-400 dark:text-gray-500">
+                  {selectedIds.size} selecionad{selectedIds.size === 1 ? 'a' : 'as'}
+                </span>
+              )}
+            </div>
+          )}
           {isLoading ? (
             <div className="flex items-center justify-center py-16">
               <Loading text="Carregando..." size="lg" />
@@ -466,18 +597,36 @@ export default function TransactionsPage() {
                       const isPreviewTransaction = isPreview(transaction.id);
                       const previewId = isPreviewTransaction && typeof transaction.id === 'string' ? transaction.id : null;
                       const remaining = isPreviewTransaction && previewId ? timeRemaining[previewId] : null;
+                      const isSelected = !isPreviewTransaction && selectedIds.has(transaction.id as number);
 
                       return (
                         <motion.div
                           key={transaction.id}
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
-                          className={`px-4 py-3.5 hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors ${
-                            isPreviewTransaction ? 'bg-amber-50/50 dark:bg-amber-950/10 border-l-2 border-amber-400 dark:border-amber-600' : ''
+                          className={`px-4 py-3.5 transition-colors ${
+                            isPreviewTransaction
+                              ? 'bg-amber-50/50 dark:bg-amber-950/10 border-l-2 border-amber-400 dark:border-amber-600'
+                              : isSelected
+                              ? 'bg-gray-50 dark:bg-gray-900/60'
+                              : 'hover:bg-gray-50 dark:hover:bg-gray-900/50'
                           }`}
                         >
                           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3">
                             <div className="flex items-center gap-3 flex-1 min-w-0">
+                              {/* Checkbox — only for non-preview */}
+                              {!isPreviewTransaction && (
+                                <button
+                                  type="button"
+                                  onClick={() => toggleSelect(transaction.id as number)}
+                                  className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors touch-manipulation"
+                                  aria-label={isSelected ? 'Desmarcar' : 'Selecionar'}
+                                >
+                                  {isSelected
+                                    ? <CheckSquare className="w-4 h-4 text-gray-900 dark:text-white" />
+                                    : <Square className="w-4 h-4 text-gray-300 dark:text-gray-600" />}
+                                </button>
+                              )}
                               {/* Type indicator */}
                               <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 ${
                                 transaction.type === "income"
@@ -549,6 +698,15 @@ export default function TransactionsPage() {
                                     <Button
                                       variant="ghost"
                                       size="icon"
+                                      onClick={() => handleDuplicate(transaction)}
+                                      title="Duplicar"
+                                      className="h-8 w-8"
+                                    >
+                                      <Copy className="h-3.5 w-3.5" />
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
                                       onClick={() => handleDelete(transaction.id)}
                                       title="Excluir"
                                       className="h-8 w-8"
@@ -583,5 +741,62 @@ export default function TransactionsPage() {
         </div>
       </div>
     </PageTransition>
+
+      {/* Floating bulk action bar — portal to escape transform context */}
+      {typeof window !== 'undefined' && createPortal(
+        <AnimatePresence>
+          {selectedIds.size > 0 && (
+            <motion.div
+              initial={{ y: 100, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 100, opacity: 0 }}
+              transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+              className="fixed bottom-6 inset-x-4 sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 sm:w-auto z-[85] flex items-center gap-2 px-3 py-2.5 bg-gray-900 dark:bg-white rounded-2xl shadow-2xl shadow-black/30"
+            >
+              {/* Count badge */}
+              <span className="flex-shrink-0 flex items-center justify-center w-7 h-7 rounded-xl bg-white/10 dark:bg-gray-900/10 text-white dark:text-gray-900 text-xs font-bold">
+                {selectedIds.size}
+              </span>
+              <div className="flex items-center gap-1.5">
+                {/* Duplicate to next month */}
+                <button
+                  type="button"
+                  onClick={handleDuplicateToNextMonth}
+                  disabled={isBulkProcessing}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-white/10 dark:bg-gray-900/10 text-white dark:text-gray-900 hover:bg-white/20 dark:hover:bg-gray-900/20 transition-colors disabled:opacity-50 touch-manipulation"
+                >
+                  {isBulkProcessing
+                    ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    : <CalendarPlus className="w-3.5 h-3.5" />}
+                  <span className="hidden sm:inline">Próximo mês</span>
+                </button>
+                {/* Delete selected */}
+                <button
+                  type="button"
+                  onClick={handleDeleteSelected}
+                  disabled={isBulkProcessing}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-red-500/80 hover:bg-red-500 text-white transition-colors disabled:opacity-50 touch-manipulation"
+                >
+                  {isBulkProcessing
+                    ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    : <Trash2 className="w-3.5 h-3.5" />}
+                  <span className="hidden sm:inline">Excluir</span>
+                </button>
+              </div>
+              {/* Dismiss */}
+              <button
+                type="button"
+                onClick={clearSelection}
+                className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-xl hover:bg-white/10 dark:hover:bg-gray-900/10 text-white/70 dark:text-gray-900/70 hover:text-white dark:hover:text-gray-900 transition-colors touch-manipulation"
+                aria-label="Cancelar seleção"
+              >
+                <XIcon className="w-4 h-4" />
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
+    </>
   );
 }

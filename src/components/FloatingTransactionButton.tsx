@@ -28,6 +28,8 @@ const initialFormData = (): TransactionFormData => ({
 interface FloatingTransactionButtonProps {
   isOpenExternal?: boolean;
   onCloseExternal?: () => void;
+  /** Pre-fill form data (e.g. for duplicate flow) */
+  initialData?: Partial<TransactionFormData>;
 }
 
 // ── Shared form content extracted as a stable component ──
@@ -38,8 +40,8 @@ interface TransactionFormContentProps {
   onAmountChange: (v: number) => void;
   onDescriptionChange: (v: string) => void;
   onDateChange: (v: string) => void;
-  onSubmit: (e: React.FormEvent) => void;
-  onSaveAndNew: () => void;
+  onSaveAndNew: () => void;  // Enter key / primary submit
+  onSaveAndClose: () => void; // explicit "Salvar e Fechar" click
   onPreview: () => void;
   onClose: () => void;
 }
@@ -51,8 +53,8 @@ function TransactionFormContent({
   onAmountChange,
   onDescriptionChange,
   onDateChange,
-  onSubmit,
   onSaveAndNew,
+  onSaveAndClose,
   onPreview,
   onClose,
 }: TransactionFormContentProps) {
@@ -73,8 +75,11 @@ function TransactionFormContent({
         </button>
       </div>
 
-      {/* Form */}
-      <form onSubmit={onSubmit} className="flex-1 overflow-y-auto px-5 pb-5 space-y-5">
+      {/* Form — onSubmit triggers onSaveAndNew (Enter key = Salvar e Criar Nova) */}
+      <form
+        onSubmit={(e) => { e.preventDefault(); onSaveAndNew(); }}
+        className="flex-1 overflow-y-auto px-5 pb-5 space-y-5"
+      >
         {/* Type Toggle */}
         <div className="grid grid-cols-2 gap-2 p-1 bg-gray-100 dark:bg-gray-900 rounded-xl">
           <button
@@ -155,10 +160,9 @@ function TransactionFormContent({
 
         {/* Actions */}
         <div className="flex flex-col gap-2 pt-1">
-          {/* Primary */}
+          {/* Primary — type="submit" so Enter key triggers this */}
           <button
-            type="button"
-            onClick={onSaveAndNew}
+            type="submit"
             disabled={isProcessing}
             className="w-full py-3 rounded-xl text-sm font-medium bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
           >
@@ -183,7 +187,8 @@ function TransactionFormContent({
               Preview
             </button>
             <button
-              type="submit"
+              type="button"
+              onClick={onSaveAndClose}
               disabled={isProcessing}
               className="flex-1 py-2.5 rounded-xl text-sm font-medium border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
             >
@@ -208,6 +213,7 @@ function TransactionFormContent({
 export default function FloatingTransactionButton({
   isOpenExternal,
   onCloseExternal,
+  initialData,
 }: FloatingTransactionButtonProps = {}) {
   const [isOpenInternal, setIsOpenInternal] = useState(false);
   const isControlled = isOpenExternal !== undefined;
@@ -228,7 +234,17 @@ export default function FloatingTransactionButton({
   const { success, error } = useToast();
   const queryClient = useQueryClient();
   const { addPreview } = usePreviewTransactions();
-  const [formData, setFormData] = useState<TransactionFormData>(initialFormData);
+  const [formData, setFormData] = useState<TransactionFormData>(() =>
+    initialData ? { ...initialFormData(), ...initialData } : initialFormData()
+  );
+
+  // When modal is opened externally (e.g. duplicate), reset form with provided initialData
+  useEffect(() => {
+    if (isOpenExternal === true) {
+      setFormData(initialData ? { ...initialFormData(), ...initialData } : initialFormData());
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpenExternal]);
 
   // Lock body scroll when modal is open
   useEffect(() => {
@@ -295,15 +311,6 @@ export default function FloatingTransactionButton({
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const saved = await saveTransaction();
-    if (!saved) return;
-    const typeText = formData.type === 'income' ? 'Receita' : 'Despesa';
-    success(`${typeText} "${formData.description}" registrada`);
-    setFormData(initialFormData());
-    setTimeout(() => setIsOpen(false), 300);
-  };
 
   const handleSaveAndCreateNew = async () => {
     const saved = await saveTransaction();
@@ -333,8 +340,15 @@ export default function FloatingTransactionButton({
     onAmountChange: (v: number) => setFormData({ ...formData, amount: v }),
     onDescriptionChange: (v: string) => setFormData({ ...formData, description: v }),
     onDateChange: (v: string) => setFormData({ ...formData, transaction_date: v }),
-    onSubmit: handleSubmit,
     onSaveAndNew: handleSaveAndCreateNew,
+    onSaveAndClose: async () => {
+      const saved = await saveTransaction();
+      if (!saved) return;
+      const typeText = formData.type === 'income' ? 'Receita' : 'Despesa';
+      success(`${typeText} "${formData.description}" registrada`);
+      setFormData(initialFormData());
+      setTimeout(() => setIsOpen(false), 300);
+    },
     onPreview: handlePreview,
     onClose: resetAndClose,
   };
