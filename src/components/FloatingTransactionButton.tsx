@@ -29,6 +29,181 @@ interface FloatingTransactionButtonProps {
   onCloseExternal?: () => void;
 }
 
+// ── Shared form content extracted as a stable component ──
+interface TransactionFormContentProps {
+  formData: TransactionFormData;
+  isProcessing: boolean;
+  onTypeChange: (type: 'income' | 'expense') => void;
+  onAmountChange: (v: number) => void;
+  onDescriptionChange: (v: string) => void;
+  onDateChange: (v: string) => void;
+  onSubmit: (e: React.FormEvent) => void;
+  onSaveAndNew: () => void;
+  onPreview: () => void;
+  onClose: () => void;
+}
+
+function TransactionFormContent({
+  formData,
+  isProcessing,
+  onTypeChange,
+  onAmountChange,
+  onDescriptionChange,
+  onDateChange,
+  onSubmit,
+  onSaveAndNew,
+  onPreview,
+  onClose,
+}: TransactionFormContentProps) {
+  return (
+    <>
+      {/* Header */}
+      <div className="flex items-center justify-between px-5 pt-5 pb-3">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+          Nova transação
+        </h3>
+        <button
+          type="button"
+          onClick={onClose}
+          disabled={isProcessing}
+          className="p-1.5 -mr-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors disabled:opacity-50"
+        >
+          <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+        </button>
+      </div>
+
+      {/* Form */}
+      <form onSubmit={onSubmit} className="flex-1 overflow-y-auto px-5 pb-5 space-y-5">
+        {/* Type Toggle */}
+        <div className="grid grid-cols-2 gap-2 p-1 bg-gray-100 dark:bg-gray-900 rounded-xl">
+          <button
+            type="button"
+            onClick={() => onTypeChange('expense')}
+            className={`flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all ${
+              formData.type === 'expense'
+                ? 'bg-white dark:bg-gray-800 text-red-600 dark:text-red-400 shadow-sm'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+            }`}
+          >
+            <ArrowUpRight className="w-4 h-4" strokeWidth={2.5} />
+            Despesa
+          </button>
+          <button
+            type="button"
+            onClick={() => onTypeChange('income')}
+            className={`flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all ${
+              formData.type === 'income'
+                ? 'bg-white dark:bg-gray-800 text-emerald-600 dark:text-emerald-400 shadow-sm'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+            }`}
+          >
+            <ArrowDownLeft className="w-4 h-4" strokeWidth={2.5} />
+            Receita
+          </button>
+        </div>
+
+        {/* Amount */}
+        <div>
+          <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">
+            Valor
+          </label>
+          <div className="relative">
+            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 text-sm font-medium">
+              R$
+            </span>
+            <input
+              type="number"
+              step="0.01"
+              min="0.01"
+              required
+              inputMode="decimal"
+              placeholder="0,00"
+              value={formData.amount || ''}
+              onChange={(e) => onAmountChange(parseFloat(e.target.value) || 0)}
+              className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-xl font-semibold text-gray-900 dark:text-white placeholder:text-gray-300 dark:placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100 focus:border-transparent transition-all"
+            />
+          </div>
+        </div>
+
+        {/* Description */}
+        <div>
+          <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">
+            Descrição
+          </label>
+          <input
+            type="text"
+            required
+            placeholder="Ex: Supermercado"
+            value={formData.description}
+            onChange={(e) => onDescriptionChange(e.target.value)}
+            className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100 focus:border-transparent transition-all"
+          />
+        </div>
+
+        {/* Date */}
+        <div>
+          <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">
+            Data
+          </label>
+          <DatePicker
+            value={formData.transaction_date}
+            onChange={onDateChange}
+            className="w-full"
+          />
+        </div>
+
+        {/* Actions */}
+        <div className="flex flex-col gap-2 pt-1">
+          {/* Primary */}
+          <button
+            type="button"
+            onClick={onSaveAndNew}
+            disabled={isProcessing}
+            className="w-full py-3 rounded-xl text-sm font-medium bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+          >
+            {isProcessing ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Salvando...
+              </>
+            ) : (
+              'Salvar e Criar Nova'
+            )}
+          </button>
+
+          {/* Secondary row */}
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={onPreview}
+              disabled={isProcessing}
+              className="flex-1 py-2.5 rounded-xl text-sm font-medium border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors disabled:opacity-50"
+            >
+              Preview
+            </button>
+            <button
+              type="submit"
+              disabled={isProcessing}
+              className="flex-1 py-2.5 rounded-xl text-sm font-medium border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {isProcessing ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  Salvando...
+                </>
+              ) : (
+                'Salvar e Fechar'
+              )}
+            </button>
+          </div>
+        </div>
+      </form>
+    </>
+  );
+}
+
+// ── Main component ──
+
 export default function FloatingTransactionButton({
   isOpenExternal,
   onCloseExternal,
@@ -39,9 +214,7 @@ export default function FloatingTransactionButton({
 
   const setIsOpen = (value: boolean) => {
     if (isControlled) {
-      if (!value && onCloseExternal) {
-        onCloseExternal();
-      }
+      if (!value && onCloseExternal) onCloseExternal();
     } else {
       setIsOpenInternal(value);
     }
@@ -149,188 +322,72 @@ export default function FloatingTransactionButton({
     setTimeout(() => setIsOpen(false), 300);
   };
 
+  const formProps = {
+    formData,
+    isProcessing,
+    onTypeChange: (type: 'income' | 'expense') => setFormData({ ...formData, type }),
+    onAmountChange: (v: number) => setFormData({ ...formData, amount: v }),
+    onDescriptionChange: (v: string) => setFormData({ ...formData, description: v }),
+    onDateChange: (v: string) => setFormData({ ...formData, transaction_date: v }),
+    onSubmit: handleSubmit,
+    onSaveAndNew: handleSaveAndCreateNew,
+    onPreview: handlePreview,
+    onClose: resetAndClose,
+  };
+
   return (
     <>
-      {/* Modal Overlay + Content */}
       <AnimatePresence>
         {isOpen && (
           <>
-            {/* Backdrop */}
+            {/* Backdrop — no blur to avoid visible strip at top */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[90]"
+              className="fixed inset-0 bg-black/60 z-[90]"
               onClick={resetAndClose}
             />
 
-            {/* Modal — mobile: bottom sheet, desktop: centered dialog */}
+            {/* ── Mobile: bottom sheet ── */}
             <motion.div
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 40 }}
-              transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-              className="fixed z-[91] inset-x-0 bottom-0 md:inset-0 md:flex md:items-center md:justify-center pointer-events-none"
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 30, stiffness: 320 }}
+              className="fixed z-[91] inset-x-0 bottom-0 md:hidden"
+              onClick={(e) => e.stopPropagation()}
             >
               <div
-                className="pointer-events-auto w-full md:w-[400px] md:max-w-[calc(100vw-2rem)] bg-white dark:bg-gray-950 rounded-t-2xl md:rounded-2xl shadow-2xl border border-transparent md:border-gray-200 md:dark:border-gray-800 overflow-hidden flex flex-col max-h-[85vh] md:max-h-[90vh]"
-                style={{ maxHeight: 'calc(var(--vh, 100vh) - 2rem)' }}
+                className="w-full bg-white dark:bg-gray-950 rounded-t-2xl shadow-2xl overflow-hidden flex flex-col"
+                style={{ maxHeight: 'calc(var(--vh, 1vh) * 88)' }}
+              >
+                <TransactionFormContent {...formProps} />
+              </div>
+            </motion.div>
+
+            {/* ── Desktop: centered dialog ── */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96, y: -8 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96, y: -8 }}
+              transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+              className="hidden md:flex fixed inset-0 z-[91] items-center justify-center"
+              onClick={resetAndClose}
+            >
+              <div
+                className="w-[400px] max-w-[calc(100vw-2rem)] bg-white dark:bg-gray-950 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col max-h-[90vh]"
                 onClick={(e) => e.stopPropagation()}
               >
-                {/* Header — minimal */}
-                <div className="flex items-center justify-between px-5 pt-5 pb-3">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                    Nova transação
-                  </h3>
-                  <button
-                    onClick={resetAndClose}
-                    disabled={isProcessing}
-                    className="p-1.5 -mr-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors disabled:opacity-50"
-                  >
-                    <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-                  </button>
-                </div>
-
-                {/* Form */}
-                <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-5 pb-5 space-y-5">
-                  {/* Type Toggle — segmented control inspired by Nubank */}
-                  <div className="grid grid-cols-2 gap-2 p-1 bg-gray-100 dark:bg-gray-900 rounded-xl">
-                    <button
-                      type="button"
-                      onClick={() => setFormData({ ...formData, type: 'expense' })}
-                      className={`flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                        formData.type === 'expense'
-                          ? 'bg-white dark:bg-gray-800 text-red-600 dark:text-red-400 shadow-sm'
-                          : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                      }`}
-                    >
-                      <ArrowUpRight className="w-4 h-4" strokeWidth={2.5} />
-                      Despesa
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setFormData({ ...formData, type: 'income' })}
-                      className={`flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                        formData.type === 'income'
-                          ? 'bg-white dark:bg-gray-800 text-emerald-600 dark:text-emerald-400 shadow-sm'
-                          : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                      }`}
-                    >
-                      <ArrowDownLeft className="w-4 h-4" strokeWidth={2.5} />
-                      Receita
-                    </button>
-                  </div>
-
-                  {/* Amount — large, prominent, bank-style */}
-                  <div>
-                    <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">
-                      Valor
-                    </label>
-                    <div className="relative">
-                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 text-sm font-medium">
-                        R$
-                      </span>
-                      <input
-                        type="number"
-                        step="0.01"
-                        min="0.01"
-                        required
-                        inputMode="decimal"
-                        placeholder="0,00"
-                        value={formData.amount || ''}
-                        onChange={(e) =>
-                          setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })
-                        }
-                        className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-xl font-semibold text-gray-900 dark:text-white placeholder:text-gray-300 dark:placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100 focus:border-transparent transition-all"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Description */}
-                  <div>
-                    <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">
-                      Descrição
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="Ex: Supermercado"
-                      value={formData.description}
-                      onChange={(e) =>
-                        setFormData({ ...formData, description: e.target.value })
-                      }
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100 focus:border-transparent transition-all"
-                    />
-                  </div>
-
-                  {/* Date */}
-                  <div>
-                    <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">
-                      Data
-                    </label>
-                    <DatePicker
-                      value={formData.transaction_date}
-                      onChange={(date) =>
-                        setFormData({ ...formData, transaction_date: date })
-                      }
-                      className="w-full"
-                    />
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex flex-col gap-2 pt-1">
-                    {/* Primary: Save + Create New */}
-                    <button
-                      type="button"
-                      onClick={handleSaveAndCreateNew}
-                      disabled={isProcessing}
-                      className="w-full py-3 rounded-xl text-sm font-medium bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-                    >
-                      {isProcessing ? (
-                        <>
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                          Salvando...
-                        </>
-                      ) : (
-                        'Salvar e Criar Nova'
-                      )}
-                    </button>
-
-                    {/* Secondary row */}
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        onClick={handlePreview}
-                        disabled={isProcessing}
-                        className="flex-1 py-2.5 rounded-xl text-sm font-medium border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors disabled:opacity-50"
-                      >
-                        Preview
-                      </button>
-                      <button
-                        type="submit"
-                        disabled={isProcessing}
-                        className="flex-1 py-2.5 rounded-xl text-sm font-medium border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-                      >
-                        {isProcessing ? (
-                          <>
-                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                            Salvando...
-                          </>
-                        ) : (
-                          'Salvar e Fechar'
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                </form>
+                <TransactionFormContent {...formProps} />
               </div>
             </motion.div>
           </>
         )}
       </AnimatePresence>
 
-      {/* FAB — mobile only, minimal */}
+      {/* FAB — mobile only */}
       {!isControlled && (
         <motion.button
           onClick={() => setIsOpen(!isOpen)}

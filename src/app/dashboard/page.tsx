@@ -176,14 +176,14 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* Ver extrato — link minimalista */}
+          {/* Ver extrato */}
           <div className="relative z-10 mt-4 flex justify-end">
             <Link
               href="/dashboard/transactions"
-              className="flex items-center gap-1 text-[11px] font-medium text-gray-400 dark:text-gray-500 hover:text-white dark:hover:text-gray-900 transition-colors group"
+              className="flex items-center gap-1.5 text-xs font-medium text-gray-300 dark:text-gray-600 hover:text-white dark:hover:text-gray-900 transition-colors group"
             >
-              ver extrato
-              <ExternalLink className="w-3 h-3 opacity-60 group-hover:opacity-100 transition-opacity" />
+              Ver extrato
+              <ExternalLink className="w-3.5 h-3.5 opacity-70 group-hover:opacity-100 transition-opacity" />
             </Link>
           </div>
         </div>

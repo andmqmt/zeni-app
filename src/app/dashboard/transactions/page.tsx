@@ -263,10 +263,10 @@ export default function TransactionsPage() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => router.back()}
-              className="inline-flex items-center gap-1.5 text-sm text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors -ml-0.5"
+              className="w-8 h-8 flex items-center justify-center rounded-xl text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors -ml-1"
+              aria-label="Voltar"
             >
-              <ChevronLeft className="w-4 h-4" strokeWidth={2} />
-              Voltar
+              <ChevronLeft className="w-5 h-5" strokeWidth={2} />
             </button>
           </div>
           <h1 className="text-2xl font-semibold text-gray-900 dark:text-white tracking-tight flex-1 text-center sm:text-left">
