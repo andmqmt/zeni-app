@@ -368,7 +368,7 @@ export default function TransactionsPage() {
         <div className="relative flex items-center justify-between min-h-[40px]">
           {/* Left: back arrow */}
           <button
-            onClick={() => router.back()}
+            onClick={() => router.push('/dashboard')}
             className="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-xl text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors -ml-1 touch-manipulation z-10"
             aria-label="Voltar"
           >
@@ -751,7 +751,7 @@ export default function TransactionsPage() {
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 100, opacity: 0 }}
               transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-              className="fixed bottom-6 inset-x-4 sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 sm:w-auto z-[85] flex items-center gap-2 px-3 py-2.5 bg-gray-900 dark:bg-white rounded-2xl shadow-2xl shadow-black/30"
+              className="fixed bottom-6 left-1/2 -translate-x-1/2 w-max z-[85] flex items-center gap-2 px-3 py-2.5 bg-gray-900 dark:bg-white rounded-2xl shadow-2xl shadow-black/30"
             >
               {/* Count badge */}
               <span className="flex-shrink-0 flex items-center justify-center w-7 h-7 rounded-xl bg-white/10 dark:bg-gray-900/10 text-white dark:text-gray-900 text-xs font-bold">
@@ -768,7 +768,7 @@ export default function TransactionsPage() {
                   {isBulkProcessing
                     ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
                     : <CalendarPlus className="w-3.5 h-3.5" />}
-                  <span className="hidden sm:inline">Próximo mês</span>
+                  <span>Próximo mês</span>
                 </button>
                 {/* Delete selected */}
                 <button
@@ -780,7 +780,7 @@ export default function TransactionsPage() {
                   {isBulkProcessing
                     ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
                     : <Trash2 className="w-3.5 h-3.5" />}
-                  <span className="hidden sm:inline">Excluir</span>
+                  <span>Excluir</span>
                 </button>
               </div>
               {/* Dismiss */}
